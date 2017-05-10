@@ -1,20 +1,56 @@
 var exec = require('cordova/exec');
-
-exports.scanDevice = function (arg0, success, error) {
-  exec(success, error, "Smartband", "scanDevice", [arg0]);
+exports.isEnabled = function (success, error) {
+  exec(success, error, "Smartband", "isEnabled", []);
 };
-
 /**
- *
+ * 扫描设备
  * @param time      扫描时间
  * @param success  返回 device
  * @param error
  */
 exports.scan = function (time, success, error) {
-  exec(success, error, "YoikScreenOrientation", "screenOrientation", time);
+  exec(success, error, "Smartband", "scan", [time]);
 };
-exports.stopScan = function (success, error) {
-  exec(success, error);
+/**
+ * 停止扫描
+ * @param success
+ * @param error
+ */
+exports.stop = function (success, error) {
+  exec(success, error, "Smartband", "stop", []);
+};
+/**
+ * 链接设备
+ * @param address
+ * @param success
+ * @param error
+ */
+exports.connect = function (address, success, error) {
+  exec(success, error, "Smartband", "connect", [address]);
+};
+/**
+ * 同步时间
+ * @param success
+ * @param error
+ */
+exports.syncBLETime = function (success, error) {
+  exec(success, error, "Smartband", "syncBLETime", []);
+};
+/**
+ * 获取版本号
+ * @param success
+ * @param error
+ */
+exports.sendToReadBLEVersion = function (success, error) {
+  exec(success, error, "Smartband", "sendToReadBLEVersion", []);
+};
+/**
+ * 读取电量
+ * @param success
+ * @param error
+ */
+exports.sendToReadBLEBattery = function (success, error) {
+  exec(success, error, "Smartband", "sendToReadBLEBattery", []);
 };
 /**
  *  设置闹钟数据模型
@@ -22,31 +58,73 @@ exports.stopScan = function (success, error) {
  * @param success
  * @param error
  */
-exports.setAlarm = function (timeInfo, success, error) {
-
-};
-exports.setUTEOption = function (type, success, error) {
-
-};
-//SDK 对固件发送命令，如固件接收到值， 则将发送返回值给 SDK，如 SDK 接收到值将 回调方法 uteManageUTEOptionCallBack:， 否则无
-exports.setUTECallBack = function (success, error) {
-
-};
-exports.registrationDeviceCallBack = function () {
-  crodva.fireDocumetEven()
+exports.sendToSetAlarmCommand = function (whichClock, weekPeroid, hour, minute, isOpen, shakePeriod, success, error) {
+  exec(success, error, "Smartband", "sendToSetAlarmCommand", [whichClock, weekPeroid, hour, minute, isOpen, shakePeriod]);
 };
 /**
- * 同步数据
+ * 设置身高体重
+ * @param height 身高(cm)
+ * @param weight 体重（kg）
+ * @param offScreenTime 灭屏时间(秒)
+ * @param stepTask  目标步数
+ * @param isRraisHandbrightScreenSwitchOpen//抬手亮屏开关 true 为开，false 为关
+ * @param isHighestRateOpen //最高心率 醒，true 为开，false 为关
+ * @param highestRate       //最后一个参数为最高心率 醒 的值。
  * @param success
  * @param error
  */
-exports.syncRunData = function (success, error) {
-
+exports.sendStepLenAndWeightToBLE = function (height, weight, offScreenTime, stepTask, isRraisHandbrightScreenSwitchOpen, isHighestRateOpen, highestRate, success, error) {
+  exec(success, error, "Smartband", "sendStepLenAndWeightToBLE", [height, weight, offScreenTime, stepTask, isRraisHandbrightScreenSwitchOpen, isHighestRateOpen, highestRate]);
 };
-exports.syncSleepData = function (success, error) {
-
+/**
+ * 久坐提醒
+ * @param success
+ * @param error
+ */
+exports.sendSedentaryRemindCommand = function (flag, miuntes, success, error) {
+  exec(success, error, "Smartband", "sendSedentaryRemindCommand", [flag, miuntes]);
 };
-
+/**
+ * 摇摇功能(之后发现设备被摇一摇时，会在 ICallback 中返回状态， ICallbackStatus.DISCOVERY_DEVICE_SHAKE)，常用于摇摇拍照等功能的实 现。
+ * @param success
+ * @param error
+ */
+exports.shakeMode = function (state, success, error) {
+  exec(success, error, "Smartband", "openShakeMode", [state]);
+};
+/**
+ * 查找手环
+ * @param vibrationCount  手环震动次数
+ * @param success
+ * @param error
+ */
+exports.findBand = function (vibrationCount, success, error) {
+  exec(success, error, "Smartband", "findBand", [vibrationCount]);
+};
+/**
+ * 清除设备所有数据，即设备恢复出厂设置
+ * @param success
+ * @param error
+ */
+exports.deleteDevicesAllData = function (success, error) {
+  exec(success, error, "Smartband", "deleteDevicesAllData", []);
+};
+/**
+ * 同步计步数据(连上设备后，请同步一次步数(实际是在设置时间后，同步步 数);同步完成前，请不要进行其他任何的通信工作)
+ * @param success
+ * @param error
+ */
+exports.syncAllStepData = function (success, error) {
+  exec(success, error, "Smartband", "syncAllStepData", []);
+};
+/**
+ * 同步睡眠数据(同步完成前，请不要进行其他任何的通信工作)
+ * @param success
+ * @param error
+ */
+exports.syncAllSleepData = function (success, error) {
+  exec(success, error, "Smartband", "syncAllSleepData", []);
+};
 
 device = {
   name: "设备名称",//NSString
@@ -54,7 +132,7 @@ device = {
   identifier: "设备唯一标识",
   isConnected: "设备连接状态",//BOOL
   battery: "设备电量",// ：连接状态才有值
-  isHasExtra: flase,//设备额外功能支持： 来电、 QQ、微信、 SMS  连接上设备才有值， 也可具体咨询我司人员 BOOL
+  isHasExtra: false,//设备额外功能支持： 来电、 QQ、微信、 SMS  连接上设备才有值， 也可具体咨询我司人员 BOOL
   isHasHRM: "设备是否支持心率， 具体咨询我司人员",//BOOL
   rssi: 90,// 设备信号强度 NSInteger
   address: "设备蓝牙地址",// NSData
@@ -95,6 +173,16 @@ SmartBandOptions = {
   UTEOptionDeleteDevicesAllData: 29,// 清除设备所有数据
   UTEOptionReadDevicesBattery: 30,//读取设备电量
 };
+GlobalVariable = {
+  //发送久坐 醒功能开启/关闭指令以及 醒周期 begin
+  CLOSE_SEDENTARY_REMIND: 0,
+  OPEN_SEDENTARY_REMIND: 1,
+  //发送久坐 醒功能开启/关闭指令以及 醒周期 end
+  FIRST_CLOCK: 1,//第一个闹钟
+  SECOND_CLOCK: 2,//第二个闹钟
+  THIRD_CLOCK: 3//第三个闹钟
+}
+;
 /*
  1） 如已连接设备 isHasExtra = NO，请使用 UTEOptionHangup/ UTEOptionHangup 设置，即
  自行监听来电， 但是 iOS9 系统以上已经不支持后台监听来电状态；
