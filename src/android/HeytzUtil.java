@@ -3,6 +3,7 @@ package com.heytz.smartband;
 import android.bluetooth.BluetoothDevice;
 import com.yc.pedometer.info.SleepTimeInfo;
 import com.yc.pedometer.info.StepInfo;
+import com.yc.pedometer.info.StepOneHourInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -62,6 +63,15 @@ public class HeytzUtil {
             json.put("sleepStatueArray",sleepTimeInfo.getSleepStatueArray());
             json.put("sleepTotalTime",sleepTimeInfo.getSleepTotalTime());
             json.put("timePointArray",sleepTimeInfo.getTimePointArray());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return json;
+    }  static JSONObject stepOneHourInfoToJSONObject(StepOneHourInfo stepOneHourInfo) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("step",stepOneHourInfo.getStep());
+            json.put("time",stepOneHourInfo.getTime());
         } catch (JSONException e) {
             e.printStackTrace();
         }

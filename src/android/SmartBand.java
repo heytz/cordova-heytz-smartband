@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.util.Log;
 import com.yc.pedometer.info.SleepTimeInfo;
 import com.yc.pedometer.info.StepInfo;
+import com.yc.pedometer.info.StepOneHourInfo;
 import com.yc.pedometer.sdk.*;
 import com.yc.pedometer.update.Updates;
 import com.yc.pedometer.utils.GlobalVariable;
@@ -295,8 +296,11 @@ public class SmartBand extends CordovaPlugin {
         //查询某一天各小时步数
         if (action.equals(Operation.QUERYONEHOURSTEPSQL.getMethod())) {
             String queryDate = args.getString(0);
-            List stepList = utesqlOperate.queryOneHourStepSQL(queryDate);
-            JSONArray jsonArray = new JSONArray(stepList);
+            List<StepOneHourInfo> stepList = utesqlOperate.queryOneHourStepSQL(queryDate);
+            JSONArray jsonArray = new JSONArray();
+            for (int i = 0; i < stepList.size(); i++) {
+                jsonArray.put(HeytzUtil.stepOneHourInfoToJSONObject(stepList.get(i)));
+            }
             callbackContext.success(jsonArray);
             return true;
         }
