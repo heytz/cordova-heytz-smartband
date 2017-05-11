@@ -79,7 +79,15 @@ public class HeytzICallback implements ICallback {
                 // step
                 // mWriteCommand.syncAllStepData();
                 break;
-            case ICallbackStatus.DISCONNECT_STATUS:
+            case ICallbackStatus.DISCONNECT_STATUS://未连接/连接失败/断开连接
+                if (heytzSmartApp.getCallbackContext(Operation.DISCONNECT.getMethod()) != null) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
+                    heytzSmartApp.getCallbackContext(Operation.DISCONNECT.getMethod()).sendPluginResult(pluginResult);
+                }
+                if (heytzSmartApp.getCallbackContext(Operation.CONNECT.getMethod()) != null) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, result);
+                    heytzSmartApp.getCallbackContext(Operation.CONNECT.getMethod()).sendPluginResult(pluginResult);
+                }
                 break;
             case ICallbackStatus.CONNECTED_STATUS:
 

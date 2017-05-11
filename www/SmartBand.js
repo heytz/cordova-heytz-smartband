@@ -2,14 +2,53 @@ var cordova = require('cordova');
 var exec = require('cordova/exec');
 var SmartBand = function () {
 };
+SmartBand.prototype.onServerCallback = {};
+SmartBand.prototype.onServiceStatuslt = {};
 SmartBand.prototype.heytzICallback = {};
+SmartBand.prototype.onStepChange = {};
+SmartBand.prototype.onSleepChange = {};
 
+/**
+ * 固件升级访问服务器回调类
+ * @param data
+ */
+SmartBand.prototype.openOnServerCallback = function (data) {
+  this.onServerCallback = data;
+  cordova.fireDocumentEvent('SmartBand.onServerCallback', this.onServerCallback)
+};
+/**
+ * 监听设备通讯
+ * @param data
+ */
+SmartBand.prototype.openOnServiceStatuslt = function (data) {
+  this.onServiceStatuslt = data;
+  cordova.fireDocumentEvent('SmartBand.onServiceStatuslt', this.onServiceStatuslt)
+};
+/**
+ * 监听设备通讯
+ * @param data
+ */
 SmartBand.prototype.openHeytzICallback = function (data) {
   data = JSON.stringify(data);
-  console.log('SmartBand:openHeytzICallback: ' + data);
-  this.receiveNotification = JSON.parse(data);
-  cordova.fireDocumentEvent('SmartBand.heytzICallback', this.receiveNotification)
+  this.heytzICallback = JSON.parse(data);
+  cordova.fireDocumentEvent('SmartBand.heytzICallback', this.heytzICallback)
 };
+/**
+ * 监听步数变化
+ * @param data
+ */
+SmartBand.prototype.openOnStepChange = function (data) {
+  data = JSON.stringify(data);
+  this.onStepChange = JSON.parse(data);
+  cordova.fireDocumentEvent('SmartBand.onStepChange', this.onStepChange)
+};
+/**
+ * 监听睡眠
+ */
+SmartBand.prototype.openOnSleepChange = function () {
+  cordova.fireDocumentEvent('SmartBand.onSleepChange', this.onSleepChange)
+};
+
 SmartBand.prototype.errorCallback = function (msg) {
   console.log('Javascript Callback Error: ' + msg)
 };
@@ -29,6 +68,14 @@ SmartBand.prototype.isEnabled = function (success, error) {
   this.callNative("isEnabled", [], success, error);
 };
 /**
+ * 是否支持BLE4.0
+ * @param success
+ * @param error
+ */
+SmartBand.prototype.isSupported = function (success, error) {
+  this.callNative("isSupported", [], success, error);
+};
+/**
  * 扫描设备
  * @param time      扫描时间
  * @param success  返回 device
@@ -46,13 +93,21 @@ SmartBand.prototype.stop = function (success, error) {
   this.callNative("stop", [], success, error);
 };
 /**
- * 链接设备
+ * 连接设备
  * @param address
  * @param success
  * @param error
  */
 SmartBand.prototype.connect = function (address, success, error) {
   this.callNative("connect", [address], success, error);
+};
+/**
+ * 断开设备
+ * @param success
+ * @param error
+ */
+SmartBand.prototype.disConnect = function (success, error) {
+  this.callNative("disConnect", [], success, error);
 };
 /**
  * 同步时间
@@ -149,12 +204,106 @@ SmartBand.prototype.syncAllStepData = function (success, error) {
   this.callNative("syncAllStepData", [], success, error);
 };
 /**
+ * 新一天初始化计步数据库
+ * @param success
+ * @param error
+ */
+SmartBand.prototype.updateStepSQL = function (success, error) {
+  this.callNative("updateStepSQL", [], success, error);
+};
+/**
+ * 查询一天的总步数
+ * @param queryDate String queryDate 查询的日期 如 20150603
+ * @param success int
+ * @param error
+ */
+SmartBand.prototype.queryStepDate = function (queryDate, success, error) {
+  this.callNative("queryStepDate", [queryDate], success, error);
+};
+/**
+ * 查询一天的步数、距离、卡路里
+ * @param queryDate String queryDate 查询的日期 如 20150603
+ * @param success StepInfo 返回步数、距离、卡路里的集合
+ * @param error
+ */
+SmartBand.prototype.queryStepInfo = function (queryDate, success, error) {
+  this.callNative("queryStepInfo", [queryDate], success, error);
+};
+/**
+ * 查询某一天各小时步数(请参考 StepOneHourInfo 类)
+ * @param Calendar Calendar 查询的日期
+ * @param success List<StepOneHourInfo> ，返回各小时和步数集合
+ * @param error
+ */
+SmartBand.prototype.queryOneHourStepSQL = function (Calendar, success, error) {
+  this.callNative("queryOneHourStepSQL", [Calendar], success, error);
+};
+/**
  * 同步睡眠数据(同步完成前，请不要进行其他任何的通信工作)
  * @param success
  * @param error
  */
 SmartBand.prototype.syncAllSleepData = function (success, error) {
   this.callNative("syncAllSleepData", [], success, error);
+};
+/**
+ * 查询一天的睡眠总时间
+ * @param queryDate queryDate 查询的日期
+ * @param success int 返回睡眠时间，单位为分钟
+ * @param error
+ */
+SmartBand.prototype.querySleepDate = function (queryDate, success, error) {
+  this.callNative("querySleepDate", [queryDate], success, error);
+};
+/**
+ * 查询一天的睡眠详情(请参考 SleepTimeInfo 类)
+ * @param calendar calendar 某 天日期(日期格式:如“20150101”)
+ * @param success SleepTimeInfo 返回某天睡眠时间、深睡、浅睡、清醒时间、睡眠状态、睡眠 状态下持续时间、睡眠状态结束时间点集合
+ * @param error
+ * @constructor
+ */
+SmartBand.prototype.querySleepInfo = function (calendar, success, error) {
+  this.callNative("querySleepInfo", [calendar], success, error);
+};
+/**
+ * 读取线损值
+ * @param success
+ * @param error
+ */
+SmartBand.prototype.readRssi = function (success, error) {
+  this.callNative("readRssi", [], success, error);
+};
+/**
+ * 判断平台
+ * @param success true :RK平台;false:dialog平台
+ * @param error
+ */
+SmartBand.prototype.isRKPlatform = function (success, error) {
+  this.callNative("isRKPlatform", [], success, error);
+};
+/**
+ * 获取新版本的版本号
+ * @param success 返回“no new version”或者返回从服务器获取到的固件版本号(升级的版本)
+ * @param error
+ */
+SmartBand.prototype.getServerBtImgVersion = function (success, error) {
+  this.callNative("getServerBtImgVersion", [], success, error);
+};
+/**
+ * 获取新版本的版本号。 示:RK 平台才有 patch 版本号。
+ * @param success 返回“no new version”或者返回从服务器获取到的 patch 版本号(升级的版本)
+ * @param error
+ */
+SmartBand.prototype.getServerPatchVersion = function (success, error) {
+  this.callNative("getServerPatchVersion", [], success, error);
+};
+/**
+ * 查询设备升级属性 (升级前必须调用查询)
+ * @param success
+ * @param error
+ */
+SmartBand.prototype.queryDeviceFearture = function (success, error) {
+  this.callNative("queryDeviceFearture", [], success, error);
 };
 
 device = {

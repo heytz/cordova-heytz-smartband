@@ -1,6 +1,8 @@
 package com.heytz.smartband;
 
 import android.bluetooth.BluetoothDevice;
+import com.yc.pedometer.info.SleepTimeInfo;
+import com.yc.pedometer.info.StepInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,6 +33,38 @@ public class HeytzUtil {
             e.printStackTrace();
         }
 
+        return json;
+    }
+
+    public static JSONObject stepInfoToJSONObject(StepInfo stepInfo) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("date",stepInfo.getDate());
+            json.put("calories",stepInfo.getCalories());
+            json.put("distance",stepInfo.getDistance());
+            json.put("sportTime",stepInfo.getSportTime());
+            json.put("step",stepInfo.getStep());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return json;
+    }
+    static JSONObject sleepTimeInfoToJSONObject(SleepTimeInfo sleepTimeInfo) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("AwakeCount",sleepTimeInfo.getAwakeCount());
+            json.put("awakeTime",sleepTimeInfo.getAwakeTime());
+            json.put("beginTime",sleepTimeInfo.getBeginTime());
+            json.put("deepTime",sleepTimeInfo.getDeepTime());
+            json.put("durationTimeArray",sleepTimeInfo.getDurationTimeArray());
+            json.put("endTime",sleepTimeInfo.getEndTime());
+            json.put("lightTime",sleepTimeInfo.getLightTime());
+            json.put("sleepStatueArray",sleepTimeInfo.getSleepStatueArray());
+            json.put("sleepTotalTime",sleepTimeInfo.getSleepTotalTime());
+            json.put("timePointArray",sleepTimeInfo.getTimePointArray());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return json;
     }
 }

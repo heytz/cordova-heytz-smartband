@@ -16,14 +16,12 @@ public class HeytzSmartApp {
     private SmartBand smartBand;
     private Activity activity;
     private ArrayList<BluetoothDevice> leDeviceList;
-    private boolean mScanning;
-    private final int REQUEST_ENABLE_BT = 1;
-    // Stops scanning after 10 seconds.
     private final long SCAN_PERIOD = 10000;
     private Map<String, CallbackContext> callbackContextMap;
 
-    HeytzSmartApp() {
+    HeytzSmartApp(SmartBand sb) {
         super();
+        this.smartBand=sb;
         leDeviceList = new ArrayList<BluetoothDevice>();
         callbackContextMap = new HashMap<String, CallbackContext>();
     }
@@ -92,11 +90,16 @@ public class HeytzSmartApp {
     public SmartBand getSmartBand() {
         return this.smartBand;
     }
+
     public void setActivity(Activity ca) {
         this.activity = ca;
     }
 
     public Activity getActivity() {
         return this.activity;
+    }
+
+    public long getScanPeriod() {
+        return SCAN_PERIOD;
     }
 }

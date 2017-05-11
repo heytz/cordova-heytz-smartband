@@ -4,8 +4,9 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Handler;
 import android.util.Log;
+import com.yc.pedometer.info.SleepTimeInfo;
+import com.yc.pedometer.info.StepInfo;
 import com.yc.pedometer.sdk.*;
 import com.yc.pedometer.update.Updates;
 import com.yc.pedometer.utils.GlobalVariable;
@@ -13,59 +14,50 @@ import org.apache.cordova.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.List;
+
 /**
  * This class echoes a string called from JavaScript.
  */
 
 public class SmartBand extends CordovaPlugin {
-    private Handler mHandler;
+    private HeytzHandler heytzHandler;
     private String TAG = "\n=========SmartBand=========\n";
     private final int REQUEST_ENABLE_BT = 1;
-    // Stops scanning after 10 seconds.
-    private final long SCAN_PERIOD = 10000;
     private CallbackContext scanCallback;
-    private static SmartBand smartBand;
     private BLEServiceOperate mBLEServiceOperate;
     private BluetoothLeService mBluetoothLeService;
     private WriteCommandToBLE mWriteCommand;
+    private UTESQLOperate utesqlOperate;
     private HeytzICallback heytziCallback;
     private HeytzDeviceScanInterfacer heytzDeviceScanInterfacer;
     private HeytzServiceStatusCallback heytzServiceStatusCallback;
     private HeytzOnServerCallbackListener heytzOnServerCallbackListener;
     private HeytzOnBleServiceUpdateListener heytzOnBleServiceUpdateListener;
     private HeytzBroadcastReceiver heytzBroadcastReceiver;
+    private HeytzStepChangeListener heytzStepChangeListener;
+    private HeytzSleepChangeListener heytzSleepChangeListener;
     private Updates mUpdates;
     private DataProcessing mDataProcessing;
     private HeytzSmartApp heytzSmartApp;
 
-    private StepChangeListener stepChangeListener = new StepChangeListener() {
-        @Override
-        public void onStepChange(int i, float v, int i1) {
-
-        }
-    };
-    private SleepChangeListener sleepChangeListener = new SleepChangeListener() {
-        @Override
-        public void onSleepChange() {
-
-        }
-    };
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
-        this.smartBand = this;
         super.initialize(cordova, webView);
         Context context = cordova.getActivity().getApplicationContext();
         mBLEServiceOperate = BLEServiceOperate.getInstance(context);// 用于BluetoothLeService实例化准备,必须
-        heytzSmartApp = new HeytzSmartApp();
-        mHandler = new Handler();
+        heytzSmartApp = new HeytzSmartApp(this);
         heytzSmartApp.setActivity(cordova.getActivity());
-        heytzSmartApp.setSmartBand(this.smartBand);
+
+        heytzHandler = new HeytzHandler(heytzSmartApp);
         heytzDeviceScanInterfacer = new HeytzDeviceScanInterfacer(heytzSmartApp);
         heytziCallback = new HeytzICallback(heytzSmartApp);
         heytzServiceStatusCallback = new HeytzServiceStatusCallback(heytzSmartApp);
         heytzOnServerCallbackListener = new HeytzOnServerCallbackListener(heytzSmartApp);
         heytzOnBleServiceUpdateListener = new HeytzOnBleServiceUpdateListener(heytzSmartApp);
         heytzBroadcastReceiver = new HeytzBroadcastReceiver(heytzSmartApp);
+        heytzStepChangeListener = new HeytzStepChangeListener(heytzSmartApp);
+        heytzSleepChangeListener = new HeytzSleepChangeListener(heytzSmartApp);
         // Checks if Bluetooth is supported on the device.
         if (!mBLEServiceOperate.isSupportBle4_0()) {
             return;
@@ -75,22 +67,26 @@ public class SmartBand extends CordovaPlugin {
         mBluetoothLeService = mBLEServiceOperate.getBleService();
         mBluetoothLeService.setICallback(heytziCallback);
         mBluetoothLeService.setBleServiceStatusListener(heytzOnBleServiceUpdateListener);
+        mBluetoothLeService.setRssiHandler(heytzHandler);
         //写入命令
         mWriteCommand = WriteCommandToBLE.getInstance(cordova.getActivity().getApplicationContext());
         //数据监听
         mDataProcessing = DataProcessing.getInstance(context);
-        mDataProcessing.setOnStepChangeListener(stepChangeListener);//步数变化监听
-        mDataProcessing.setOnSleepChangeListener(sleepChangeListener);//listener 睡眠监听
+        mDataProcessing.setOnStepChangeListener(heytzStepChangeListener);//步数变化监听
+        mDataProcessing.setOnSleepChangeListener(heytzSleepChangeListener);//listener 睡眠监听
 //        mDataProcessing.setOnRateListener(mOnRateListener);//心率监听
 //        mDataProcessing.setOnBloodPressureListener(bloodPressureChangeListener);//Listener 血压监听
 
         mRegisterReceiver();
         mUpdates = Updates.getInstance(context);
-        mUpdates.setHandler(mHandler);// 获取升级操作信息
+        mUpdates.setHandler(heytzHandler);// 获取升级操作信息
         mUpdates.registerBroadcastReceiver();
         mUpdates.setOnServerCallbackListener(heytzOnServerCallbackListener);
         Log.d("onServerDiscorver", "MainActivity_onCreate   mUpdates  ="
                 + mUpdates);
+
+        //数据
+        utesqlOperate = UTESQLOperate.getInstance(context);
 
     }
 
@@ -143,6 +139,15 @@ public class SmartBand extends CordovaPlugin {
             if (!isExist) {
                 callbackContext.error("device don't exist");
             }
+            return true;
+        }
+        if (action.equals(Operation.DISCONNECT.getMethod())) {
+            mBLEServiceOperate.disConnect();
+            return true;
+        }
+        if (action.equals(Operation.UNBINDSERVICE.getMethod())) {
+            mBLEServiceOperate.unBindService();
+            callbackContext.success();
             return true;
         }
         if (action.equals(Operation.ISENABLED.getMethod())) {
@@ -267,14 +272,84 @@ public class SmartBand extends CordovaPlugin {
             mWriteCommand.syncAllStepData();
             return true;
         }
+        //新一天初始化计步数据库
+        if (action.equals(Operation.UPDATESTEPSQL.getMethod())) {
+            utesqlOperate.updateStepSQL();
+            callbackContext.success();
+            return true;
+        }
+        //查询一天的总步数
+        if (action.equals(Operation.QUERYSTEPDATE.getMethod())) {
+            String queryDate = args.getString(0);
+            int totalStep = utesqlOperate.queryStepDate(queryDate);
+            callbackContext.success(totalStep);
+            return true;
+        }
+        //查询一天的步数、距离、卡路里
+        if (action.equals(Operation.QUERYSTEPDINFO.getMethod())) {
+            String queryDate = args.getString(0);
+            StepInfo stepInfo = utesqlOperate.queryStepInfo(queryDate);
+            callbackContext.success(HeytzUtil.stepInfoToJSONObject(stepInfo));
+            return true;
+        }
+        //查询某一天各小时步数
+        if (action.equals(Operation.QUERYONEHOURSTEPSQL.getMethod())) {
+            String queryDate = args.getString(0);
+            List stepList = utesqlOperate.queryOneHourStepSQL(queryDate);
+            JSONArray jsonArray = new JSONArray(stepList);
+            callbackContext.success(jsonArray);
+            return true;
+        }
         //同步睡眠数据(同步完成前，请不要进行其他任何的通信工作)
         if (action.equals(Operation.SYNCALLSLEEPDATA.getMethod())) {
             mWriteCommand.syncAllSleepData();
             return true;
         }
+        //查询一天的睡眠总时间
+        if (action.equals(Operation.QUERYSLEEPDATE.getMethod())) {
+            String queryDate = args.getString(0);
+            int miuntes = utesqlOperate.querySleepDate(queryDate);
+            callbackContext.success(miuntes);
+            return true;
+        }
+        //查询一天的睡眠详情
+        if (action.equals(Operation.QUERYSLEEPINFO.getMethod())) {
+            String calendar = args.getString(0);
+            SleepTimeInfo sleepTimeInfo = utesqlOperate.querySleepInfo(calendar);
+            callbackContext.success(HeytzUtil.sleepTimeInfoToJSONObject(sleepTimeInfo));
+            return true;
+        }
         //查询设备升级属性 (升级前必须调用查询
         if (action.equals(Operation.QUERYDEVICEFEARTURE.getMethod())) {
             mWriteCommand.queryDeviceFearture();
+            return true;
+        }
+        //查询设备升级属性 (升级前必须调用查询
+        if (action.equals(Operation.READRSSI.getMethod())) {
+            mBluetoothLeService.readRssi();
+            return true;
+        }
+        //判断平台
+        if (action.equals(Operation.ISRKPLATFORM.getMethod())) {
+            boolean b = mUpdates.isRKPlatform();
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, b);
+            callbackContext.sendPluginResult(pluginResult);
+            return true;
+        }
+        //获取新版本的版本号
+        if (action.equals(Operation.GETSERVERBTIMGVERSION.getMethod())) {
+            String version = mUpdates.getServerBtImgVersion();
+            callbackContext.success(version);
+            return true;
+        }
+        //获取新版本的版本号。 示:RK 平台才有 patch 版本号。
+        if (action.equals(Operation.GETSERVERPATCHVERSION.getMethod())) {
+            String version = mUpdates.getServerPatchVersion();
+            callbackContext.success(version);
+            return true;
+        }
+        if (action.equals(Operation.GETSERVERPATCHVERSION.getMethod())) {
+            mWriteCommand.sendOffHookCommand();
             return true;
         }
         return false;
@@ -291,18 +366,17 @@ public class SmartBand extends CordovaPlugin {
             return;
         }
         if (enable) {
-            mHandler.postDelayed(new Runnable() {
+            heytzHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     mBLEServiceOperate.stopLeScan();
                 }
-            }, scanSeconds <= 0 ? SCAN_PERIOD : scanSeconds * 1000);
+            }, scanSeconds <= 0 ? heytzSmartApp.getScanPeriod() : scanSeconds * 1000);
             mBLEServiceOperate.startLeScan();
         } else {
             mBLEServiceOperate.stopLeScan();
         }
     }
-
 
 
 }

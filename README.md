@@ -3,7 +3,7 @@
 
 android版本要求 sdk 最低18 
 
-功能列表
+#功能列表
     
    [1.初始化](1.初始化) (Android)
     
@@ -51,20 +51,39 @@ android版本要求 sdk 最低18
    
    [23.判断蓝牙是否打开](23.判断蓝牙是否打开)   (Android)
    
-   [24.查询睡眠详情](24.查询睡眠详情)
+   [24.查询睡眠详情](24.查询一天的睡眠总时间)
    
-   [25.查询步数详情](25.查询步数详情)
+   [25.新一天初始化计步数据库](25.新一天初始化计步数据库)
    
-   [26.读取线损值](26.读取线损值，每读一次，即监听一次)
+   [26.查询一天的总步数](26.查询一天的总步数)
    
-   [27.断开设备](27.断开设备)
+   [27.查询步数详情](27.查询一天步数、距离、卡路里的集合)
    
-   [28.解绑服务](28.解绑服务)
+   [28.查询某一天各小时步数](28.查询某一天各小时步数)
    
-   [29.接触绑定](29.解绑绑定)
+   [29.读取线损值](29.读取线损值，每读一次，即监听一次)
    
+   [30.断开设备](30.断开设备)
    
+   [31.解绑服务](31.解绑服务) （未实现）
    
+   [32.接触绑定](32.解绑绑定)
+   
+   [33.查询一天的睡眠详情](33.查询一天的睡眠详情)
+   
+   [34.是否支持蓝牙4.0](34.是否支持蓝牙4.0)
+   
+   [35.判断平台](35.判断平台)
+   
+   [36.获取新版本的版本号](36.获取新版本的版本号)
+   
+   [37.获取新版本的版本号](37.获取新版本的版本号)
+   
+   [38.查询设备升级属性](38.查询设备升级属性)
+   
+
+
+ 
 ##1.初始化
 
     cordova.plugins.Smartband.init(success,error)
@@ -128,9 +147,84 @@ android版本要求 sdk 最低18
 ##23.判断蓝牙是否打开
     
      cordova.plugins.Smartband.isEnabled(success,error)
+
+##24.查询一天的睡眠总时间
+    
+     cordova.plugins.Smartband.querySleepDate(queryDate,success,error)
      
+##25.新一天初始化计步数据库
+    
+     cordova.plugins.Smartband.updateStepSQL(success,error)
+     
+##26.查询一天的总步数
+    
+     cordova.plugins.Smartband.queryStepDate(queryDate,success,error)
+     
+##27.查询一天的步数、距离、卡路里
+    
+     cordova.plugins.Smartband.queryStepInfo(queryDate,success,error)
+     
+##28.查询某一天各小时步数
+    
+     cordova.plugins.Smartband.queryOneHourStepSQL(Calendar,success,error)
+     
+##29.读取线损值rssi
+    
+     cordova.plugins.Smartband.readRssi(success,error)
+     
+##30.断开设备
+    
+     cordova.plugins.Smartband.disConnect(success,error)
+     
+##33.查询一天的睡眠详情
+    
+     cordova.plugins.Smartband.querySleepInfo(calendar,success,error)
+          
+##34.是否支持蓝牙4.0
+    
+     cordova.plugins.Smartband.isSupported(success,error)
+          
+##35.判断平台
+    
+     cordova.plugins.Smartband.isRKPlatform(success,error)
+          
+##36.获取新版本的版本号
+    
+     cordova.plugins.Smartband.getServerBtImgVersion(success,error)
+          
+##37.获取新版本的版本号
+    
+     cordova.plugins.Smartband.getServerPatchVersion(success,error)
+          
+##38.查询设备升级属性
+    
+     cordova.plugins.Smartband.queryDeviceFearture(success,error)
+          
+    
   
-  
+#监听接口
+   
+   [1.监听设备通讯](1.监听设备通讯)
+   
+   [2.监听步数变化](2.监听步数变化)
+   
+   [3.查询睡眠详情](3.查询睡眠详情)
+   
+   [4.查询睡眠详情](4.查询睡眠详情)
+   
+##1.监听设备通讯  
+
+    document.addEventListener("SmartBand.heytzICallback", success(data), false);
+
+##2.监听步数变化
+
+    document.addEventListener("SmartBand.onStepChange", success(data), false);
+
+##3.监听睡眠
+   
+    document.addEventListener("SmartBand.onSleepChange", success(), false);
+
+     
      
     
     
