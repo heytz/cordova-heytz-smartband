@@ -19,7 +19,7 @@ public class HeytzUtil {
         JSONObject json = new JSONObject();
         try {
             json.put("id", device.getAddress()); // mac address
-            json.put("getUuids", device.getUuids());
+            json.put("uuid", device.getUuids());
             json.put("name", device.getName());
             json.put("address", device.getAddress()); // mac address
 //            json.put("getBluetoothClass", device.getBluetoothClass());

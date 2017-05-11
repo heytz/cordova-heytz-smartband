@@ -2,14 +2,14 @@
 
 #import <Cordova/CDV.h>
 
-@interface Smartband : CDVPlugin {
+@interface SmartBand : CDVPlugin {
   // Member variables go here.
 }
 
 - (void)coolMethod:(CDVInvokedUrlCommand*)command;
 @end
 
-@implementation Smartband
+@implementation SmartBand
 
 - (void)coolMethod:(CDVInvokedUrlCommand*)command
 {

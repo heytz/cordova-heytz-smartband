@@ -5,6 +5,7 @@ package com.heytz.smartband;
  */
 public enum Operation {
 
+    INIT("init"),           //初始化
     SCAN("scan"),           //扫描
     STOPSCAN("stopScan"),           //停止扫描
     ISSUPPORTED("isSupported"),                   //

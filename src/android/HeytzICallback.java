@@ -4,6 +4,8 @@ import android.util.Log;
 import com.yc.pedometer.sdk.ICallback;
 import com.yc.pedometer.sdk.ICallbackStatus;
 import org.apache.cordova.PluginResult;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by chendongdong on 2017/5/9.
@@ -100,6 +102,24 @@ public class HeytzICallback implements ICallback {
                 Log.d(TAG, "血压数据同步完成");
                 break;
         }
+        if (this.heytzSmartApp.getSmartBand() == null) {
+            return;
+        }
+        JSONObject data = new JSONObject();
+        try {
+            data.put("result", result);
+            data.put("status", status);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        String format = "cordova.plugins.SmartBand.HeytzICallback(%s);";
+        final String js = String.format(format, data.toString());
+        heytzSmartApp.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                heytzSmartApp.getSmartBand().webView.loadUrl("javascript:" + js);
+            }
+        });
     }
 
     @Override
@@ -121,7 +141,7 @@ public class HeytzICallback implements ICallback {
 
     @Override
     public void onCharacteristicWriteCallback(int status) {
-// 写入操作的系统回调，status = 0为写入成功，其他或无回调表示失败
+        // 写入操作的系统回调，status = 0为写入成功，其他或无回调表示失败
         Log.d(TAG, "Write System callback status = " + status);
     }
 

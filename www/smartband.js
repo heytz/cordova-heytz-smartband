@@ -1,6 +1,14 @@
 var exec = require('cordova/exec');
+/**
+ * 初始化，初始化方法只是为了实现类的初始化。
+ * @param success
+ * @param error
+ */
+exports.init = function (success, error) {
+  exec(success, error, "SmartBand", "init", []);
+};
 exports.isEnabled = function (success, error) {
-  exec(success, error, "Smartband", "isEnabled", []);
+  exec(success, error, "SmartBand", "isEnabled", []);
 };
 /**
  * 扫描设备
@@ -9,7 +17,7 @@ exports.isEnabled = function (success, error) {
  * @param error
  */
 exports.scan = function (time, success, error) {
-  exec(success, error, "Smartband", "scan", [time]);
+  exec(success, error, "SmartBand", "scan", [time]);
 };
 /**
  * 停止扫描
@@ -17,7 +25,7 @@ exports.scan = function (time, success, error) {
  * @param error
  */
 exports.stop = function (success, error) {
-  exec(success, error, "Smartband", "stop", []);
+  exec(success, error, "SmartBand", "stop", []);
 };
 /**
  * 链接设备
@@ -26,7 +34,7 @@ exports.stop = function (success, error) {
  * @param error
  */
 exports.connect = function (address, success, error) {
-  exec(success, error, "Smartband", "connect", [address]);
+  exec(success, error, "SmartBand", "connect", [address]);
 };
 /**
  * 同步时间
@@ -34,7 +42,7 @@ exports.connect = function (address, success, error) {
  * @param error
  */
 exports.syncBLETime = function (success, error) {
-  exec(success, error, "Smartband", "syncBLETime", []);
+  exec(success, error, "SmartBand", "syncBLETime", []);
 };
 /**
  * 获取版本号
@@ -42,7 +50,7 @@ exports.syncBLETime = function (success, error) {
  * @param error
  */
 exports.sendToReadBLEVersion = function (success, error) {
-  exec(success, error, "Smartband", "sendToReadBLEVersion", []);
+  exec(success, error, "SmartBand", "sendToReadBLEVersion", []);
 };
 /**
  * 读取电量
@@ -50,16 +58,21 @@ exports.sendToReadBLEVersion = function (success, error) {
  * @param error
  */
 exports.sendToReadBLEBattery = function (success, error) {
-  exec(success, error, "Smartband", "sendToReadBLEBattery", []);
+  exec(success, error, "SmartBand", "sendToReadBLEBattery", []);
 };
 /**
  *  设置闹钟数据模型
- * @param timeInfo {time:"",week:[0,1,2,3,4],num:1}
+ * @param whichClock
+ * @param weekPeroid
+ * @param hour
+ * @param minute
+ * @param isOpen
+ * @param shakePeriod
  * @param success
  * @param error
  */
 exports.sendToSetAlarmCommand = function (whichClock, weekPeroid, hour, minute, isOpen, shakePeriod, success, error) {
-  exec(success, error, "Smartband", "sendToSetAlarmCommand", [whichClock, weekPeroid, hour, minute, isOpen, shakePeriod]);
+  exec(success, error, "SmartBand", "sendToSetAlarmCommand", [whichClock, weekPeroid, hour, minute, isOpen, shakePeriod]);
 };
 /**
  * 设置身高体重
@@ -74,7 +87,7 @@ exports.sendToSetAlarmCommand = function (whichClock, weekPeroid, hour, minute, 
  * @param error
  */
 exports.sendStepLenAndWeightToBLE = function (height, weight, offScreenTime, stepTask, isRraisHandbrightScreenSwitchOpen, isHighestRateOpen, highestRate, success, error) {
-  exec(success, error, "Smartband", "sendStepLenAndWeightToBLE", [height, weight, offScreenTime, stepTask, isRraisHandbrightScreenSwitchOpen, isHighestRateOpen, highestRate]);
+  exec(success, error, "SmartBand", "sendStepLenAndWeightToBLE", [height, weight, offScreenTime, stepTask, isRraisHandbrightScreenSwitchOpen, isHighestRateOpen, highestRate]);
 };
 /**
  * 久坐提醒
@@ -82,7 +95,7 @@ exports.sendStepLenAndWeightToBLE = function (height, weight, offScreenTime, ste
  * @param error
  */
 exports.sendSedentaryRemindCommand = function (flag, miuntes, success, error) {
-  exec(success, error, "Smartband", "sendSedentaryRemindCommand", [flag, miuntes]);
+  exec(success, error, "SmartBand", "sendSedentaryRemindCommand", [flag, miuntes]);
 };
 /**
  * 摇摇功能(之后发现设备被摇一摇时，会在 ICallback 中返回状态， ICallbackStatus.DISCOVERY_DEVICE_SHAKE)，常用于摇摇拍照等功能的实 现。
@@ -90,7 +103,7 @@ exports.sendSedentaryRemindCommand = function (flag, miuntes, success, error) {
  * @param error
  */
 exports.shakeMode = function (state, success, error) {
-  exec(success, error, "Smartband", "openShakeMode", [state]);
+  exec(success, error, "SmartBand", "shakeMode", [state]);
 };
 /**
  * 查找手环
@@ -99,7 +112,7 @@ exports.shakeMode = function (state, success, error) {
  * @param error
  */
 exports.findBand = function (vibrationCount, success, error) {
-  exec(success, error, "Smartband", "findBand", [vibrationCount]);
+  exec(success, error, "SmartBand", "findBand", [vibrationCount]);
 };
 /**
  * 清除设备所有数据，即设备恢复出厂设置
@@ -107,7 +120,7 @@ exports.findBand = function (vibrationCount, success, error) {
  * @param error
  */
 exports.deleteDevicesAllData = function (success, error) {
-  exec(success, error, "Smartband", "deleteDevicesAllData", []);
+  exec(success, error, "SmartBand", "deleteDevicesAllData", []);
 };
 /**
  * 同步计步数据(连上设备后，请同步一次步数(实际是在设置时间后，同步步 数);同步完成前，请不要进行其他任何的通信工作)
@@ -115,7 +128,7 @@ exports.deleteDevicesAllData = function (success, error) {
  * @param error
  */
 exports.syncAllStepData = function (success, error) {
-  exec(success, error, "Smartband", "syncAllStepData", []);
+  exec(success, error, "SmartBand", "syncAllStepData", []);
 };
 /**
  * 同步睡眠数据(同步完成前，请不要进行其他任何的通信工作)
@@ -123,7 +136,7 @@ exports.syncAllStepData = function (success, error) {
  * @param error
  */
 exports.syncAllSleepData = function (success, error) {
-  exec(success, error, "Smartband", "syncAllSleepData", []);
+  exec(success, error, "SmartBand", "syncAllSleepData", []);
 };
 
 device = {
@@ -174,7 +187,7 @@ SmartBandOptions = {
   UTEOptionReadDevicesBattery: 30,//读取设备电量
 };
 GlobalVariable = {
-  //发送久坐 醒功能开启/关闭指令以及 醒周期 begin
+  //发送久坐提醒功能开启/关闭指令以及 醒周期 begin
   CLOSE_SEDENTARY_REMIND: 0,
   OPEN_SEDENTARY_REMIND: 1,
   //发送久坐 醒功能开启/关闭指令以及 醒周期 end

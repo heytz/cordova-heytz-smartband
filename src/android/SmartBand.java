@@ -9,10 +9,7 @@ import android.util.Log;
 import com.yc.pedometer.sdk.*;
 import com.yc.pedometer.update.Updates;
 import com.yc.pedometer.utils.GlobalVariable;
-import org.apache.cordova.CallbackContext;
-import org.apache.cordova.CordovaInterface;
-import org.apache.cordova.CordovaPlugin;
-import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -20,14 +17,14 @@ import org.json.JSONException;
  * This class echoes a string called from JavaScript.
  */
 
-public class Smartband extends CordovaPlugin {
+public class SmartBand extends CordovaPlugin {
     private Handler mHandler;
     private String TAG = "\n=========SmartBand=========\n";
     private final int REQUEST_ENABLE_BT = 1;
     // Stops scanning after 10 seconds.
     private final long SCAN_PERIOD = 10000;
     private CallbackContext scanCallback;
-
+    private static SmartBand smartBand;
     private BLEServiceOperate mBLEServiceOperate;
     private BluetoothLeService mBluetoothLeService;
     private WriteCommandToBLE mWriteCommand;
@@ -54,6 +51,10 @@ public class Smartband extends CordovaPlugin {
         }
     };
 
+    SmartBand() {
+        this.smartBand = this;
+    }
+
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
@@ -61,6 +62,8 @@ public class Smartband extends CordovaPlugin {
         mBLEServiceOperate = BLEServiceOperate.getInstance(context);// 用于BluetoothLeService实例化准备,必须
         heytzSmartApp = new HeytzSmartApp();
         mHandler = new Handler();
+        heytzSmartApp.setActivity(cordova.getActivity());
+        heytzSmartApp.setSmartBand(this.smartBand);
         heytzDeviceScanInterfacer = new HeytzDeviceScanInterfacer(heytzSmartApp);
         heytziCallback = new HeytzICallback(heytzSmartApp);
         heytzServiceStatusCallback = new HeytzServiceStatusCallback(heytzSmartApp);
@@ -92,6 +95,7 @@ public class Smartband extends CordovaPlugin {
         mUpdates.setOnServerCallbackListener(heytzOnServerCallbackListener);
         Log.d("onServerDiscorver", "MainActivity_onCreate   mUpdates  ="
                 + mUpdates);
+
     }
 
     private void mRegisterReceiver() {
@@ -104,6 +108,10 @@ public class Smartband extends CordovaPlugin {
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         heytzSmartApp.setCallbackContext(action, callbackContext);
+        if (action.equals(Operation.INIT.getMethod())) {
+            callbackContext.success();
+            return true;
+        }
         if (action.equals(Operation.SCAN.getMethod())) {
             heytzSmartApp.clearLeDeviceList();
             scanDevice(true, 0);
@@ -171,14 +179,17 @@ public class Smartband extends CordovaPlugin {
         if (action.equals(Operation.SYNCBLETIME.getMethod())) {
             mWriteCommand.syncBLETime();
             callbackContext.success();
+            return true;
         }
         //读取电量
         if (action.equals(Operation.SENDTOREADBLEBATTERY.getMethod())) {
             mWriteCommand.sendToReadBLEBattery();
+            return true;
         }
         //读取版本号
         if (action.equals(Operation.SENDTOREADBLEVERSION.getMethod())) {
             mWriteCommand.sendToReadBLEVersion();
+            return true;
         }
         //发送久坐 醒功能开启/关闭指令以及 醒周期
         if (action.equals(Operation.SENDSEDENTARYREMINDCOMMAND.getMethod())) {
@@ -186,6 +197,7 @@ public class Smartband extends CordovaPlugin {
             int minutes = args.getInt(1);
             mWriteCommand.sendSedentaryRemindCommand(flag, minutes);
             callbackContext.success();
+            return true;
         }
         //摇一摇
         if (action.equals(Operation.SHAKEMODE.getMethod())) {
@@ -196,6 +208,7 @@ public class Smartband extends CordovaPlugin {
                 mWriteCommand.closeShakeMode();
                 callbackContext.success();
             }
+            return true;
         }
         //发送设置闹钟指令
         if (action.equals(Operation.SENDTOSETALARMCOMMAND.getMethod())) {
@@ -228,6 +241,7 @@ public class Smartband extends CordovaPlugin {
             }
             mWriteCommand.sendToSetAlarmCommand(whichClock, weekPeroid,
                     hour, minute, isOpen, shakePeriod);// 新增最后一个参数，振动次数//2.2.1版本修改
+            return true;
         }
         //发身高体重和灭屏时间、目标步数、抬手亮屏
         // 醒:修改身高体重后，需要同步一次计步数据，应用上的距离和卡 路里才会按照新修改的身高体重进行计算并更新。
@@ -240,27 +254,33 @@ public class Smartband extends CordovaPlugin {
             boolean isHighestRateOpen = args.getBoolean(5);//最高心率 醒，true 为开，false 为关
             int highestRate = args.getInt(6);//最后一个参数为最高心率 醒 的值。
             mWriteCommand.sendStepLenAndWeightToBLE(height, weight, offScreenTime, stepTask, isRraisHandbrightScreenSwitchOpen, isHighestRateOpen, highestRate);// 新增最后一个参数，振动次数//2.2.1版本修改
+            return true;
         }
         //查找手环
         if (action.equals(Operation.FINDBAND.getMethod())) {
             int vibrationCount = args.getInt(0);
             mWriteCommand.findBand(vibrationCount);
+            return true;
         }
         //清除设备所有数据，即设备恢复出厂设置
         if (action.equals(Operation.DELETEDEVICEALLDATA.getMethod())) {
             mWriteCommand.deleteDevicesAllData();
+            return true;
         }
         //同步计步数据(连上设备后，请同步一次步数(实际是在设置时间后，同步步 数);同步完成前，请不要进行其他任何的通信工作)
         if (action.equals(Operation.SYNALLSTEPDATA.getMethod())) {
             mWriteCommand.syncAllStepData();
+            return true;
         }
         //同步睡眠数据(同步完成前，请不要进行其他任何的通信工作)
         if (action.equals(Operation.SYNCALLSLEEPDATA.getMethod())) {
             mWriteCommand.syncAllSleepData();
+            return true;
         }
         //查询设备升级属性 (升级前必须调用查询
         if (action.equals(Operation.QUERYDEVICEFEARTURE.getMethod())) {
             mWriteCommand.queryDeviceFearture();
+            return true;
         }
         return false;
     }

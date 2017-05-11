@@ -1,5 +1,6 @@
 package com.heytz.smartband;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import org.apache.cordova.CallbackContext;
 
@@ -12,7 +13,8 @@ import java.util.Map;
  */
 public class HeytzSmartApp {
     public final String TAG = "\n=========HeytzSmartApp=========\n";
-
+    private SmartBand smartBand;
+    private Activity activity;
     private ArrayList<BluetoothDevice> leDeviceList;
     private boolean mScanning;
     private final int REQUEST_ENABLE_BT = 1;
@@ -46,6 +48,9 @@ public class HeytzSmartApp {
      * @param callbackContext
      */
     void setCallbackContext(String key, CallbackContext callbackContext) {
+        if (callbackContextMap.containsKey(key)) {
+            callbackContextMap.remove(key);
+        }
         callbackContextMap.put(key, callbackContext);
     }
 
@@ -78,5 +83,20 @@ public class HeytzSmartApp {
      */
     public void removeCallbackContext(String key) {
         callbackContextMap.remove(key);
+    }
+
+    public void setSmartBand(SmartBand sb) {
+        this.smartBand = sb;
+    }
+
+    public SmartBand getSmartBand() {
+        return this.smartBand;
+    }
+    public void setActivity(Activity ca) {
+        this.activity = ca;
+    }
+
+    public Activity getActivity() {
+        return this.activity;
     }
 }
