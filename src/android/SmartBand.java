@@ -50,13 +50,9 @@ public class SmartBand extends CordovaPlugin {
 
         }
     };
-
-    SmartBand() {
-        this.smartBand = this;
-    }
-
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+        this.smartBand = this;
         super.initialize(cordova, webView);
         Context context = cordova.getActivity().getApplicationContext();
         mBLEServiceOperate = BLEServiceOperate.getInstance(context);// 用于BluetoothLeService实例化准备,必须
@@ -196,7 +192,6 @@ public class SmartBand extends CordovaPlugin {
             int flag = args.getInt(0);
             int minutes = args.getInt(1);
             mWriteCommand.sendSedentaryRemindCommand(flag, minutes);
-            callbackContext.success();
             return true;
         }
         //摇一摇
@@ -307,6 +302,7 @@ public class SmartBand extends CordovaPlugin {
             mBLEServiceOperate.stopLeScan();
         }
     }
+
 
 
 }

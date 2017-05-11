@@ -1,14 +1,32 @@
+var cordova = require('cordova');
 var exec = require('cordova/exec');
+var SmartBand = function () {
+};
+SmartBand.prototype.heytzICallback = {};
+
+SmartBand.prototype.openHeytzICallback = function (data) {
+  data = JSON.stringify(data);
+  console.log('SmartBand:openHeytzICallback: ' + data);
+  this.receiveNotification = JSON.parse(data);
+  cordova.fireDocumentEvent('SmartBand.heytzICallback', this.receiveNotification)
+};
+SmartBand.prototype.errorCallback = function (msg) {
+  console.log('Javascript Callback Error: ' + msg)
+};
+
+SmartBand.prototype.callNative = function (name, args, successCallback, errorCallback) {
+  exec(successCallback, errorCallback, 'SmartBand', name, args);
+};
 /**
  * 初始化，初始化方法只是为了实现类的初始化。
  * @param success
  * @param error
  */
-exports.init = function (success, error) {
-  exec(success, error, "SmartBand", "init", []);
+SmartBand.prototype.init = function (success, error) {
+  this.callNative("init", [], success, error);
 };
-exports.isEnabled = function (success, error) {
-  exec(success, error, "SmartBand", "isEnabled", []);
+SmartBand.prototype.isEnabled = function (success, error) {
+  this.callNative("isEnabled", [], success, error);
 };
 /**
  * 扫描设备
@@ -16,16 +34,16 @@ exports.isEnabled = function (success, error) {
  * @param success  返回 device
  * @param error
  */
-exports.scan = function (time, success, error) {
-  exec(success, error, "SmartBand", "scan", [time]);
+SmartBand.prototype.scan = function (time, success, error) {
+  this.callNative("scan", [time], success, error);
 };
 /**
  * 停止扫描
  * @param success
  * @param error
  */
-exports.stop = function (success, error) {
-  exec(success, error, "SmartBand", "stop", []);
+SmartBand.prototype.stop = function (success, error) {
+  this.callNative("stop", [], success, error);
 };
 /**
  * 链接设备
@@ -33,32 +51,32 @@ exports.stop = function (success, error) {
  * @param success
  * @param error
  */
-exports.connect = function (address, success, error) {
-  exec(success, error, "SmartBand", "connect", [address]);
+SmartBand.prototype.connect = function (address, success, error) {
+  this.callNative("connect", [address], success, error);
 };
 /**
  * 同步时间
  * @param success
  * @param error
  */
-exports.syncBLETime = function (success, error) {
-  exec(success, error, "SmartBand", "syncBLETime", []);
+SmartBand.prototype.syncBLETime = function (success, error) {
+  this.callNative("syncBLETime", [], success, error);
 };
 /**
  * 获取版本号
  * @param success
  * @param error
  */
-exports.sendToReadBLEVersion = function (success, error) {
-  exec(success, error, "SmartBand", "sendToReadBLEVersion", []);
+SmartBand.prototype.sendToReadBLEVersion = function (success, error) {
+  this.callNative("sendToReadBLEVersion", [], success, error);
 };
 /**
  * 读取电量
  * @param success
  * @param error
  */
-exports.sendToReadBLEBattery = function (success, error) {
-  exec(success, error, "SmartBand", "sendToReadBLEBattery", []);
+SmartBand.prototype.sendToReadBLEBattery = function (success, error) {
+  this.callNative("sendToReadBLEBattery", [], success, error);
 };
 /**
  *  设置闹钟数据模型
@@ -71,8 +89,8 @@ exports.sendToReadBLEBattery = function (success, error) {
  * @param success
  * @param error
  */
-exports.sendToSetAlarmCommand = function (whichClock, weekPeroid, hour, minute, isOpen, shakePeriod, success, error) {
-  exec(success, error, "SmartBand", "sendToSetAlarmCommand", [whichClock, weekPeroid, hour, minute, isOpen, shakePeriod]);
+SmartBand.prototype.sendToSetAlarmCommand = function (whichClock, weekPeroid, hour, minute, isOpen, shakePeriod, success, error) {
+  this.callNative("sendToSetAlarmCommand", [whichClock, weekPeroid, hour, minute, isOpen, shakePeriod], success, error);
 };
 /**
  * 设置身高体重
@@ -86,24 +104,24 @@ exports.sendToSetAlarmCommand = function (whichClock, weekPeroid, hour, minute, 
  * @param success
  * @param error
  */
-exports.sendStepLenAndWeightToBLE = function (height, weight, offScreenTime, stepTask, isRraisHandbrightScreenSwitchOpen, isHighestRateOpen, highestRate, success, error) {
-  exec(success, error, "SmartBand", "sendStepLenAndWeightToBLE", [height, weight, offScreenTime, stepTask, isRraisHandbrightScreenSwitchOpen, isHighestRateOpen, highestRate]);
+SmartBand.prototype.sendStepLenAndWeightToBLE = function (height, weight, offScreenTime, stepTask, isRraisHandbrightScreenSwitchOpen, isHighestRateOpen, highestRate, success, error) {
+  this.callNative("sendStepLenAndWeightToBLE", [height, weight, offScreenTime, stepTask, isRraisHandbrightScreenSwitchOpen, isHighestRateOpen, highestRate], success, error);
 };
 /**
  * 久坐提醒
  * @param success
  * @param error
  */
-exports.sendSedentaryRemindCommand = function (flag, miuntes, success, error) {
-  exec(success, error, "SmartBand", "sendSedentaryRemindCommand", [flag, miuntes]);
+SmartBand.prototype.sendSedentaryRemindCommand = function (flag, miuntes, success, error) {
+  this.callNative("sendSedentaryRemindCommand", [flag, miuntes], success, error);
 };
 /**
  * 摇摇功能(之后发现设备被摇一摇时，会在 ICallback 中返回状态， ICallbackStatus.DISCOVERY_DEVICE_SHAKE)，常用于摇摇拍照等功能的实 现。
  * @param success
  * @param error
  */
-exports.shakeMode = function (state, success, error) {
-  exec(success, error, "SmartBand", "shakeMode", [state]);
+SmartBand.prototype.shakeMode = function (state, success, error) {
+  this.callNative("shakeMode", [state], success, error);
 };
 /**
  * 查找手环
@@ -111,32 +129,32 @@ exports.shakeMode = function (state, success, error) {
  * @param success
  * @param error
  */
-exports.findBand = function (vibrationCount, success, error) {
-  exec(success, error, "SmartBand", "findBand", [vibrationCount]);
+SmartBand.prototype.findBand = function (vibrationCount, success, error) {
+  this.callNative("findBand", [vibrationCount], success, error);
 };
 /**
  * 清除设备所有数据，即设备恢复出厂设置
  * @param success
  * @param error
  */
-exports.deleteDevicesAllData = function (success, error) {
-  exec(success, error, "SmartBand", "deleteDevicesAllData", []);
+SmartBand.prototype.deleteDevicesAllData = function (success, error) {
+  this.callNative("deleteDevicesAllData", [], success, error);
 };
 /**
  * 同步计步数据(连上设备后，请同步一次步数(实际是在设置时间后，同步步 数);同步完成前，请不要进行其他任何的通信工作)
  * @param success
  * @param error
  */
-exports.syncAllStepData = function (success, error) {
-  exec(success, error, "SmartBand", "syncAllStepData", []);
+SmartBand.prototype.syncAllStepData = function (success, error) {
+  this.callNative("syncAllStepData", [], success, error);
 };
 /**
  * 同步睡眠数据(同步完成前，请不要进行其他任何的通信工作)
  * @param success
  * @param error
  */
-exports.syncAllSleepData = function (success, error) {
-  exec(success, error, "SmartBand", "syncAllSleepData", []);
+SmartBand.prototype.syncAllSleepData = function (success, error) {
+  this.callNative("syncAllSleepData", [], success, error);
 };
 
 device = {
@@ -214,3 +232,13 @@ GlobalVariable = {
  3）当连接上设备时， SDK 会自动第一次读取设备电量。 之后如需要，请开发者自行调用查
  询电量 API， 查询更新当前电量。
  */
+
+if (!window.plugins) {
+  window.plugins = {}
+}
+
+if (!window.plugins.SmartBand) {
+  window.plugins.SmartBand = new SmartBand()
+}
+cordova.fireDocumentEvent('SmartBand.HeytzICallback', window.plugins.SmartBand.HeytzICallback);
+module.exports = new SmartBand();

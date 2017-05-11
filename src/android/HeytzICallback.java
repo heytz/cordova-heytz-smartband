@@ -18,16 +18,48 @@ public class HeytzICallback implements ICallback {
         this.heytzSmartApp = app;
     }
 
+    /**
+     * ICallback 回调结果
+     *
+     * @param result true 通信完成
+     * @param status 如 ICallbackStatus 类中描述
+     */
     @Override
     public void OnResult(boolean result, int status) {
-// TODO Auto-generated method stub
         Log.i(TAG, "result=" + result + ",status=" + status);
         switch (status) {
-            case ICallbackStatus.OFFLINE_STEP_SYNC_OK:
+            case ICallbackStatus.OFFLINE_STEP_SYNCING:
+                Log.d(TAG, "步数同步中");
                 // step snyc complete
+                if (heytzSmartApp.getCallbackContext(Operation.SYNALLSTEPDATA.getMethod()) != null) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, "syncing");
+                    pluginResult.setKeepCallback(true);
+                    heytzSmartApp.getCallbackContext(Operation.SYNALLSTEPDATA.getMethod()).sendPluginResult(pluginResult);
+                }
+                break;
+            case ICallbackStatus.OFFLINE_STEP_SYNC_OK:
+                Log.d(TAG, "步数同步完成");
+                // step snyc complete
+                if (heytzSmartApp.getCallbackContext(Operation.SYNALLSTEPDATA.getMethod()) != null) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, "ok");
+                    heytzSmartApp.getCallbackContext(Operation.SYNALLSTEPDATA.getMethod()).sendPluginResult(pluginResult);
+                }
+                break;
+            case ICallbackStatus.OFFLINE_SLEEP_SYNCING:
+                Log.d(TAG, "睡眠同步中");
+                if (heytzSmartApp.getCallbackContext(Operation.SYNCALLSLEEPDATA.getMethod()) != null) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, "syncing");
+                    pluginResult.setKeepCallback(true);
+                    heytzSmartApp.getCallbackContext(Operation.SYNCALLSLEEPDATA.getMethod()).sendPluginResult(pluginResult);
+                }
                 break;
             case ICallbackStatus.OFFLINE_SLEEP_SYNC_OK:
                 // sleep snyc complete
+                Log.d(TAG, "睡眠同步完成");
+                if (heytzSmartApp.getCallbackContext(Operation.SYNCALLSLEEPDATA.getMethod()) != null) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, "ok");
+                    heytzSmartApp.getCallbackContext(Operation.SYNCALLSLEEPDATA.getMethod()).sendPluginResult(pluginResult);
+                }
                 break;
             case ICallbackStatus.SYNC_TIME_OK: // after set time
                 // finish, then(or
@@ -35,6 +67,10 @@ public class HeytzICallback implements ICallback {
                 // to read
                 // localBleVersion
                 // mWriteCommand.sendToReadBLEVersion();
+                if (heytzSmartApp.getCallbackContext(Operation.SYNCBLETIME.getMethod()) != null) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
+                    heytzSmartApp.getCallbackContext(Operation.SYNCBLETIME.getMethod()).sendPluginResult(pluginResult);
+                }
                 break;
             case ICallbackStatus.GET_BLE_VERSION_OK: // after read
                 // localBleVersion
@@ -101,6 +137,20 @@ public class HeytzICallback implements ICallback {
             case ICallbackStatus.OFFLINE_BLOOD_PRESSURE_SYNC_OK:
                 Log.d(TAG, "血压数据同步完成");
                 break;
+            case ICallbackStatus.SEDENTARY_REMIND_OPEN:
+            case ICallbackStatus.SEDENTARY_REMIND_CLOSE:
+                Log.d(TAG, "久坐提醒");
+                if (heytzSmartApp.getCallbackContext(Operation.SENDSEDENTARYREMINDCOMMAND.getMethod()) != null) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, status);
+                    heytzSmartApp.getCallbackContext(Operation.SENDSEDENTARYREMINDCOMMAND.getMethod()).sendPluginResult(pluginResult);
+                }
+                break;
+            case ICallbackStatus.SET_STEPLEN_WEIGHT_OK:
+                if (heytzSmartApp.getCallbackContext(Operation.SENDSTEPLENANDWEIGHTTOBLE.getMethod()) != null) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, status);
+                    heytzSmartApp.getCallbackContext(Operation.SENDSTEPLENANDWEIGHTTOBLE.getMethod()).sendPluginResult(pluginResult);
+                }
+                break;
         }
         if (this.heytzSmartApp.getSmartBand() == null) {
             return;
@@ -112,7 +162,7 @@ public class HeytzICallback implements ICallback {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        String format = "cordova.plugins.SmartBand.HeytzICallback(%s);";
+        String format = "cordova.plugins.SmartBand.openHeytzICallback(%s);";
         final String js = String.format(format, data.toString());
         heytzSmartApp.getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -122,6 +172,13 @@ public class HeytzICallback implements ICallback {
         });
     }
 
+    /**
+     * OnDataResult 交通卡接口回调结果
+     *
+     * @param result 通信完成
+     * @param status 如 ICallbackStatus 类中 述
+     * @param data   BLE 返回的数据
+     */
     @Override
     public void OnDataResult(boolean result, int status, byte[] data) {
         StringBuilder stringBuilder = null;
@@ -139,24 +196,52 @@ public class HeytzICallback implements ICallback {
         }
     }
 
+    /**
+     * 写入操作状态的系统回调，status = 0 为写入成功，其他或无回 调表示失败
+     *
+     * @param status
+     */
     @Override
     public void onCharacteristicWriteCallback(int status) {
         // 写入操作的系统回调，status = 0为写入成功，其他或无回调表示失败
         Log.d(TAG, "Write System callback status = " + status);
     }
 
+    /**
+     * Ibeacon 功能设置和读取回调
+     *
+     * @param result
+     * @param ibeaconSetOrGet
+     * @param ibeaconType
+     * @param data
+     */
     @Override
-    public void onIbeaconWriteCallback(boolean b, int i, int i1, String s) {
+    public void onIbeaconWriteCallback(boolean result, int ibeaconSetOrGet, int ibeaconType, String data) {
 
     }
 
+    /**
+     * 查询表盘方式的回调，请参考 MainActivity 使用
+     *
+     * @param result
+     * @param screenWith
+     * @param screenHeight
+     * @param screenCount
+     */
     @Override
-    public void onQueryDialModeCallback(boolean b, int i, int i1, int i2) {
+    public void onQueryDialModeCallback(boolean result, int screenWith, int screenHeight, int screenCount) {
 
     }
 
+    /**
+     * 控制表盘切换和左右手切换回调，请参考 MainActivity 使用
+     *
+     * @param result
+     * @param leftRightHand
+     * @param dialType
+     */
     @Override
-    public void onControlDialCallback(boolean b, int i, int i1) {
+    public void onControlDialCallback(boolean result, int leftRightHand, int dialType) {
 
     }
 }

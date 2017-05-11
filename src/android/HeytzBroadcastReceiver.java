@@ -17,9 +17,14 @@ public class HeytzBroadcastReceiver extends BroadcastReceiver {
         this.heytzSmartApp = app;
     }
 
+    /**
+     * @param context
+     * @param intent
+     */
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
+        Log.d(TAG, action);
         if (action.equals(GlobalVariable.READ_BLE_VERSION_ACTION)) {
             String version = intent
                     .getStringExtra(GlobalVariable.INTENT_BLE_VERSION_EXTRA);
