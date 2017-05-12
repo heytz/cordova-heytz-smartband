@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova-heytz-smartband" version="0.1.0" xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>cordova-heytz-smartband</name>
+
+    <js-module name="SmartBand" src="www/SmartBand.js">
+        <clobbers target="cordova.plugins.SmartBand"/>
+    </js-module>
+    <platform name="ios">
+        <config-file parent="/*" target="config.xml">
+            <feature name="SmartBand">
+                <param name="ios-package" value="SmartBand"/>
+            </feature>
+        </config-file>
+        <source-file src="src/ios/SmartBand.m"/>
+
+        <header-file src="src/ios/lib/include/UTESmartBandClient/UTESmartBandClient.h"/>
+        <source-file src="src/ios/lib/libUTESmartBandClient.a" framework="true"/>
+
+        <framework src="SystemConfiguration.framework" weak="true"/>
+        <framework src="libsqlite3.tbd" weak="true"/>
+    </platform>
+    <platform name="android">
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="SmartBand">
+                <param name="android-package" value="com.heytz.smartband.SmartBand"/>
+            </feature>
+        </config-file>
+        <config-file parent="/manifest" target="AndroidManifest.xml">
+            <!-- Required  一些系统要求的权限-->
+            <uses-feature
+                    android:name="android.hardware.bluetooth_le"
+                    android:required="false"/>
+            <uses-permission android:name="android.permission.BLUETOOTH" android:required="false"/>
+            <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:required="false"/>
+            <uses-permission android:name="android.permission.WAKE_LOCK" android:required="false"/>
+            <!--<uses-permission android:name="android.permission.INTERNET" android:required="false"/>-->
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:required="false"/>
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" android:required="false"/>
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" android:required="false"/>
+            <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" android:required="false"/>
+            <uses-permission android:name="android.permission.WRITE_SETTINGS" android:required="false"/>
+            <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" android:required="false"/>
+            <uses-permission android:name="android.permission.GET_TASKS" android:required="false"/>
+            <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" android:required="false"/>
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:required="false"/>
+        </config-file>
+
+        <config-file parent="/manifest/application" target="AndroidManifest.xml">
+            <service android:name="com.yc.pedometer.sdk.BluetoothLeService" android:enabled="true"/>
+            <service android:name="com.realsil.android.blehub.dfu.DfuService"></service>
+            <meta-data android:name="YCAPPKEY" android:value="f0b520cdb42c7103f6683977793ae81c"/>
+        </config-file>
+
+        <source-file src="src/android/HeytzBroadcastReceiver.java" target-dir="src/com/heytz/smartband"/>
+        <source-file src="src/android/HeytzDeviceScanInterfacer.java" target-dir="src/com/heytz/smartband"/>
+        <source-file src="src/android/HeytzHandler.java" target-dir="src/com/heytz/smartband"/>
+        <source-file src="src/android/HeytzICallback.java" target-dir="src/com/heytz/smartband"/>
+        <source-file src="src/android/HeytzOnBleServiceUpdateListener.java" target-dir="src/com/heytz/smartband"/>
+        <source-file src="src/android/HeytzOnServerCallbackListener.java" target-dir="src/com/heytz/smartband"/>
+        <source-file src="src/android/HeytzServiceStatusCallback.java" target-dir="src/com/heytz/smartband"/>
+        <source-file src="src/android/HeytzSleepChangeListener.java" target-dir="src/com/heytz/smartband"/>
+        <source-file src="src/android/HeytzSmartApp.java" target-dir="src/com/heytz/smartband"/>
+        <source-file src="src/android/HeytzStepChangeListener.java" target-dir="src/com/heytz/smartband"/>
+        <source-file src="src/android/HeytzUtil.java" target-dir="src/com/heytz/smartband"/>
+        <source-file src="src/android/Operation.java" target-dir="src/com/heytz/smartband"/>
+        <source-file src="src/android/SmartBand.java" target-dir="src/com/heytz/smartband"/>
+
+        <!--<source-file src="src/android/lib/android-support-v4.jar" target-dir="libs"/>-->
+        <source-file src="src/android/lib/ute_sdk_v2.4.0.jar" target-dir="libs"/>
+        <source-file src="src/android/lib/armeabi/libAesJni.so" target-dir="libs/armeabi"/>
+        <framework src="com.android.support:support-v4:24.1.1+" />
+    </platform>
+</plugin>
