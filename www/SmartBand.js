@@ -347,7 +347,7 @@ SmartBandOptions = {
   UTEOptionCloseRemindQQ: 23,//关闭设备 QQ 提醒 前提 isHasExtra = YES
   UTEOptionCloseRemindWeixin: 24,//关闭设备微信提醒 前提 isHasExtra = YES
   UTEOptionCloseRemindSms: 25,//关闭设备 SMS 提醒 前提 isHasExtra = YES
-  UTEOptionOpenRemindMore: 26,//关闭设备更多提醒 前提 isHasExtra = YES
+  UTEOptionCloseRemindMore: 26,//关闭设备更多提醒 前提 isHasExtra = YES
   UTEOptionOpenCameraMode: 27,//打开设备摇一摇拍照模式
   UTEOptionCloseCameraMode: 28,//关闭设备摇一摇拍照模式
   UTEOptionDeleteDevicesAllData: 29,// 清除设备所有数据
@@ -360,9 +360,258 @@ GlobalVariable = {
   //发送久坐 醒功能开启/关闭指令以及 醒周期 end
   FIRST_CLOCK: 1,//第一个闹钟
   SECOND_CLOCK: 2,//第二个闹钟
-  THIRD_CLOCK: 3//第三个闹钟
-}
-;
+  THIRD_CLOCK: 3,//第三个闹钟
+
+
+  // 轻型数据库名字
+  SettingSP: "SettingSP",
+  //蓝牙连接状态 ，SharedPreferences KEY值
+  BLE_CONNECTED_SP: "ble_connected",
+  // 上一次连接的蓝牙地址 ，SharedPreferences KEY值
+  LAST_CLICK_DEVICE_ADDRESS_SP: "last_click_device_address", //当天已保存的步数，SharedPreferences KEY值
+  CURRENT_DAY_SAVED_STEP_COUNT: "current_day_saved_step_count",
+  // 今天的步数，临时存储而已方便更新今天界面而已，步数一更新就变了，SharedPreferences KEY值
+  YC_PED_CURRENT_HOUR_STEPS_SP: "current_hour_steps", //今天的步数，临时存储而已方便更新今天界面而已，步数一更新就变了，SharedPreferences KEY值
+  YC_PED_STEPS_SP: "steps",
+  //没用到，SharedPreferences KEY值
+  YC_PED_PACE_SP: "pace",
+  // 今天的路程，临时存储而已方便更新今天界面而已，步数一更新就变了，SharedPreferences KEY值
+  YC_PED_DISTANCE_SP: "distance",
+  //没用到，SharedPreferences KEY值
+  YC_PED_SPEED_SP: "speed",
+  // 今天的卡路里，临时存储而已方便更新今天界面而已，步数一更新就变了，SharedPreferences KEY 值
+  //当前小时的步数，如当前时间是10:42分，则表示10:00~10:42分的步数，SharedPreferences KEY 值
+  YC_PED_UNFINISH_HOUR_STEP_SP: "unfinish_hour_step",
+  // 当前小时值，SharedPreferences KEY值
+  YC_PED_UNFINISH_HOUR_VALUE_SP: "unfinish_hour_value", // 实时计步时，上一条计步数据来时的步数，SharedPreferences KEY值
+  YC_PED_LAST_HOUR_STEP_SP: "last_hour_step", //实时计步时，上一条计步数据来时的小时数，SharedPreferences KEY值
+  YC_PED_LAST_HOUR_VALUE_SP: "last_hour_value", //设置BLE步长和体重的广播ACTION
+  SET_BLE_STEP_LENGTH_WEIGHT: "set_ble_step_length_weight",
+  BLE_DISCONNECT_BINDDEVICE_ACTION: "ble_disconnect_binddevice_action",
+  CIRCLE_BTN_TYPE: "circle_btn_type", // 个人信息 年龄，SharedPreferences KEY值
+  PERSONAGE_AGE: "personage_age_sp", //个人信息 步长，SharedPreferences KEY值
+  PERSONAGE_STEP_LENGTH: "step_length", // 个人信息 身高，SharedPreferences KEY值
+  PERSONAGE_HEIGHT: "personage_height", //个人信息 体重，SharedPreferences KEY值
+  PERSONAGE_WEIGHT: "body_weight", //上一次同步计步数据结束帧的日期，SharedPreferences KEY值
+  B2FD_CALENDAR_SP: "b2fd_calendar_sp", //上一次同步睡眠数据结束帧的日期，SharedPreferences KEY值
+  B3FD_CALENDAR_SP: "b3fd_calendar_sp",
+  RSSI_SP: "rssi_sp",
+  BEL_BATTERY_VALUE_SP: "ble_battery_value",
+  BLE_STEP_STATUS_SP: "ble_step_status",
+  BLE_SLEEP_STATUS_SP: "ble_sleep_status",
+  STEP_MODE_SP: "step_mode",
+  IMG_LOCAL_VERSION_NAME_SP: "img_local_version_name",
+  BLE_CALENDAR_SP: "ble_step_calendar",
+// 同步睡眠数据广播
+  SLEEP_ALL_DATA_ACTION: "sleep_all_data_action",
+// 同步计步数据广播
+  STEP_ALL_DATA_ACTION: "step_all_data_action",
+  ONLY_SET_OFF_SCREEN_TIME: "only_set_off_screen_time",
+  OFF_SCREEN_TIME: "off_screen_time",
+  LAST_DAY_NUMBER_SP: "last_day_number",
+  LAST_DAY_CALLENDAR_SP: "last_day_calendar",
+  FIRST_OPEN_APK: "first_open_apk",
+  LAST_REFRESH_TIME: "last_refresh_time", //运动详情 上一次刷新时间
+  LAST_REFRESH_PHONE_MINUTE: "last_refresh_phone_minute",//上一次刷 新时的手机分钟数
+  LAST_REFRESH_STEP: "last_refresh_step",//上一次刷新时的步数
+  READ_BATTERY_ACTION: "read_battery_action",
+  READ_BLE_VERSION_ACTION: "read_ble_version_action",
+  SEND_DEVICE_INFO_ACTION: "send_device_info_action",
+  QQType: 1,
+  WeChatType: 2,
+  PhoneType: 2,
+  SmsType: 3,
+  EXTRA_RSSI: "RSSI",
+  EXTRA_RSSI_STATUS: "RSSI_STATUS",
+  INTENT_BLE_VERSION_EXTRA: "get_ble_version",
+  INTENT_BLE_BATTERY_EXTRA: "get_ble_battery",
+  /**
+   * Handler Message * */
+  GET_RSSI_MSG: 10,
+  REFRESH_UI_MSG: 11,
+  NEEDLESS_REFRESH_UI_MSG: 12,
+  /**
+   * Alarm clock */
+//peroid
+  ALARM_INVALID: 0x00,
+  SUNDAY: 0x01,
+  MONDAY: 0x02,
+  TUESDAY: 0x04,
+  WEDNESDAY: 0x08,
+  THURSDAY: 0x10,
+  FRIDAY: 0x20,
+  SATURDAY: 0x40,
+  EVERYDAY: 0x7F, //which clock
+  // FIRST_CLOCK: 1,
+  // SECOND_CLOCK: 2,
+  // THIRD_CLOCK: 3,
+
+  //update status
+  OLD_VERSION_STATUS: 1,//当前是旧版本状态，允许升级
+  FREQUENT_ACCESS_STATUS: 2,//频繁访问服务器状态
+  NEWEST_VERSION_STATUS: 3,//当前已是最新版本状态
+  ACCESS_VERSER_STATUS: 4,//正在访问服务器
+  //rate
+  RATE_TESTING: 0,//心率测试中
+  RATE_TEST_FINISH: 1,//心率测试完成
+  RATE_TEST_START: 2,//开始心率测试
+  RATE_TEST_STOP: 3,//停止心率测试
+  //sedentary remind
+//   OPEN_SEDENTARY_REMIND: 1,//打开久坐 醒
+//   CLOSE_SEDENTARY_REMIND: 0,//关闭久坐 醒
+
+
+  DEVICE_FEATURE_MSEEAGE: "device_feature_message",//设备升级属性是 推送功能
+  DEVICE_FEATURE_UPDATE: "device_feature_update",//设备升级属性是升 级功能
+  DEVICE_FEATURE_WECHAT: "device_feature_wechat",//设备升级属性是微 信排行
+  DEVICE_FEATURE_KEY: "device_feature_key",
+  CHANGE_DEVICE_FEATURE_SUCCESS_ACTION: "change_device_feature_success_action",
+  BLUETOOTH_REBOOT_SUCCESS_KEY: "bluetooth_reboot_success_key",
+  BLUETOOTH_REBOOT_SUCCESS_ACTION: "bluetooth_reboot_success_action",
+  DEVICE_FEATURE_IS_INVALID: "device_feature_is_invalid",
+  FIRST_FEATURE: 1,
+  SECOND_FEATURE: 2,
+  UPDATE_BLE_PROGRESS_MSG: 103,//固件升级进度百分比
+  ACTION_GATT_CONNECT_FAILURE: "bluetooth.le.ACTION_GATT_FAILURE",
+  IS_METRIC_UNIT_SP: "is_metric_unit_sp",//公英制单位KEY
+  UV_VALUE_SP: "uv_value_sp",//UV紫外线KEY
+  RATE_STATIC: 1, //静态心率
+  RATE_DYNAMIC: 2,//动态心率
+  TYPE_PHONE: 0,//消息内容类型 推送来电名字和号码
+  TYPE_QQ: 1,//消息内容类型 昵称和内容
+  TYPE_WECHAT: 2,//消息内容类型
+  TYPE_SMS: 3,//消息内容类型 来短信名字、号码、内容
+// RK 固件升级
+// patchDownLaodAddresses,
+  patchServiceVersionCode: "",
+  BleAndPatchAllHasNews: false,
+  BleHasNews: false,
+  PatchHasNews: false,
+  updateCount: 0,
+  BLE_UPDATE_AGAIN: "ble_update_again",
+  BLE_PATCH_DOWNLOAD_ADDR_SP: "ble_patch_download_addr",
+  PATH_LOCAL_VERSION_NAME_SP: "path_local_version_name",
+  PASSWORD_TYPE_SET: 1,//设置密码
+  PASSWORD_TYPE_INPUT: 2,//输入密码
+  PASSWORD_TYPE_INPUT_AGAIN: 3,//重新输入密码
+//IS_SUPPORT_FULL_FONT : false,//是否是全字库(删除，用GetFunctionList.isSupportFunction 判断)
+
+
+  SMS_RECEIVED_NUMBER: "sms_received_number",
+  /*
+   * 个人信息 性别，SharedPreferences KEY 值，boolean true 为男，false 为女
+   */
+  publicstaticfinalStringPERSONAGE_GENDER: "personage_gender_sp",//个人信息 性别
+  LAST_BLOOD_PRESSURE_CALENDAR_SP: "last_blood_pressure_calendar_sp",
+  BLOOD_PRESSURE_TEST_STOP: 0,//停止血压测试
+  BLOOD_PRESSURE_TEST_START: 1,//开始血压测试
+  BLOOD_PRESSURE_TESTING: 3,//血压测试中
+  BLOOD_PRESSURE_TEST_FINISH: 4,//血压测试完成
+  CHARACTERISTIC_FUNCTION_LIST_SP: "characteristic_function_list_sp",
+  IS_SUPPORT_PASS_WORD_PAIR: 0x01, // 密码配对
+  IS_SUPPORT_WEATHER_FORECAST: 0x02, // 天气预报
+  IS_SUPPORT_MULTIPLE_LANGUAGE: 0x04, // 多国语言
+  IS_SUPPORT_Do_NOT_DISTURB: 0x08, // 勿扰
+  IS_SUPPORT_SWIMMING: 0x10, // 游泳
+  IS_SUPPORT_HOR_VER: 0x20, // 横竖屏
+  IS_SUPPORT_RAISE_HAND_BRIGHT: 0x40, // 抬手亮屏开关
+  SCREEN_VERTICAL: 1,//竖屏
+  SCREEN_HORIZONTAL: 2,//横屏
+  WEATHER_FORECAST_SWITCH_SP: "weather_forecast_switch_sp",
+  WEATHER_FORECAST_ACTION: "weather_forecast_action",
+  WEATHER_FORECAST_TODAY_WEATHER: "todayWeather",
+  WEATHER_FORECAST_TODAY_CURRENT_TMP: "todayCurrentTmp",
+  WEATHER_FORECAST_TODAY_TMP_MAX: "todayTmpMax",
+  WEATHER_FORECAST_TODAY_TMP_MIN: "todayTmpMin",
+  WEATHER_FORECAST_TODAY_PM25: "todayPM25",
+  WEATHER_FORECAST_TODAY_AQI: "todayAqi",
+  WEATHER_FORECAST_TOMORROW_WEATHER: "tommorrowWeather",
+  WEATHER_FORECAST_TOMORROW_TMP_MAX: "tommorrowTmpMax",
+  WEATHER_FORECAST_TOMORROW_TMP_MIN: "tommorrowTmpMin",//(新)
+  SERVER_IS_BUSY: 201,//访问服务器回调状态,服务器忙
+  SERVER_CALL_BACK_SUCCESSFULL: 202,//访问服务器回调状态,服 务连接正常,已获取到固件版本
+  UNIT_TYPE_METRICE: 1,// 公制单位 UNIT_TYPE_IMPERIAL : 2,// 英制单位
+
+  HOUR_FORMAT_24: 1,// 24小时制
+  HOUR_FORMAT_12: 2,// 12 小时制
+  IS_SUPPORT_DIAL_SWITCH: 0x800, // 判断是否支持表盘切换和 左右手切换功能
+  IS_SUPPORT_IBEACON: 0x1000, // 判断是否支持ibeacon这个功 能
+  IS_SUPPORT_SEVEN_DAYS_WEATHER: 0x2000, // 判断是否支持 七 天天气(新)
+  IS_SUPPORT_SEDENTARY_REMINDER: 0x10000, // 支持久坐 醒 功能Support sedentary reminder
+  IS_SUPPORT_THREE_ALARM_CLOCK: 0x20000, // 支持多个闹钟(三 个)
+  IS_SUPPORT_TRANSACTION_REMINDER: 0x40000, // 支持事务  醒 Support for transaction reminders
+  publicstaticfinalintIBEACON_TYPE_UUID: 1,//Ibeacon 指令类型,设置UUID/获取UUID
+  IBEACON_TYPE_MAJOR: 2,// Ibeacon 指令类型,设置major/获取 major
+  IBEACON_TYPE_MINOR: 4,// Ibeacon 指令类型,设置minor/获取 minor
+  IBEACON_TYPE_DEVICE_NAME: 8,// Ibeacon 指令类型,设置蓝牙 device name/获取蓝牙device name(新)
+  IBEACON_TYPE_TX_POWER: 16,// Ibeacon 指令类型,设置蓝牙 TX_POWER/获取蓝牙TX_POWER
+  IBEACON_TYPE_ADVERTISING_INTERVAL: 32,// Ibeacon 指令类 型,设置蓝牙 advertising interval/获取蓝牙 advertising interval
+  IBEACON_SET: 0,// Ibeacon 设置(设置UUID/设置major,设置 minor,设置蓝牙device name)
+  IBEACON_GET: 1,// Ibeacon 获取(设置UUID/设置major,设置 minor,设置蓝牙device name)
+  LEFT_HAND_WEAR: 0,// 左手佩戴 Left hand wear
+  RIGHT_HAND_WEAR: 1,// 右手佩戴 Right hand wear
+  NOT_SET_UP: 0xff,// 不设置
+  SHOW_HORIZONTAL_SCREEN: 0,// 显示横屏 Show horizontal screen
+  SHOW_VERTICAL_ENGLISH_SCREEN: 1,// 显示竖屏英文界面
+  SHOW_VERTICAL_CHINESE_SCREEN: 2,// 显示竖屏中文界面
+};
+ICallBackSatatus = {
+  REAL_TIME_STEP: 0,//当前属于实时步数操作
+  OFFLINE_STEP_SYNCING: 1,//离线步数同步中
+  OFFLINE_STEP_SYNC_OK: 2,//离线步数同步完成
+  REAL_TIME_SLEEP: 3,//当前属于实时睡眠操作
+  OFFLINE_SLEEP_SYNCING: 4,//离线睡眠同步中
+  OFFLINE_SLEEP_SYNC_OK: 5,//离线睡眠同步完成
+  SYNC_TIME_OK: 6,//设置时间操作完成
+  SION_OK: 7,//获取设备版本号操作完成
+  SET_STEPLEN_WEIGHT_OK: 8,//设置身高体重操作完成
+  GET_SPORT_STATUS_OK: 9,//获取运动状态(计步或睡眠)操作完成
+  GET_BLE_BATTERY_OK: 10,//获取电量操作完成
+  PRESS_DEVICE_BUTTON: 11,//按下设备按钮操作
+  SEND_INCALL_OR_SMS_NAME_OK: 12,//发送来电或短信用户名字操作完成
+  SEND_INCALL_NUMBER_OK: 13,//发送来电号码操作完成
+  SEND_SMS_NUMBER_OK: 14,//发送短信号码操作完成
+  SEND_OFFHOOK_OK: 15,//挂断/接听电话操作完成
+  SEND_QQ_COMMAND_OK: 16,//发送QQ指令操作完成
+  SEND_WECHAT_COMMAND_OK: 17,//发送微信指令操作完成
+  OPERATION_FAILE: 18,//操作失败
+  DISCONNECT_STATUS: 19,//未连接/连接失败/断开连接
+  CONNECTED_STATUS: 20,//已连接
+  DISCOVERY_DEVICE_SHAKE: 21,//发现设备摇一摇(常用于摇摇拍照)
+
+  OFFLINE_RATE_SYNCING: 22,//离线心率同步中
+  OFFLINE_RATE_SYNC_OK: 23,//离线心率同步完成
+  RATE_TEST_FAILE: 24,//心率测试失败
+  SEDENTARY_REMIND_OPEN: 25,//久坐 醒已打开
+  SEDENTARY_REMIND_CLOSE: 26,//久坐 醒已关闭
+  SET_METRICE_OK: 27,//设置公制单位成功
+  SET_INCH_OK: 28,//设置英制单位成功
+  SET_FIRST_ALARM_CLOCK_OK: 29,//设置第1个闹钟OK
+  SET_SECOND_ALARM_CLOCK_OK: 30,//设置第2个闹钟OK
+  SET_THIRD_ALARM_CLOCK_OK: 31,//设置第 3 个闹钟 OK
+
+  OPEN_CHANNEL_OK: 32,//打开通道OK
+  CLOSE_CHANNEL_OK: 33,//关闭通道OK
+  BLE_DATA_BACK_OK: 34, //测试通道 OK，通道正常
+  GET_UV_BACK_OK: 35, //读取UV紫外线OK
+  SEND_QQ_WHAT_SMS_CONTENT_OK: 36, //发送QQ、微信、短信内容OK
+  SEND_PHONE_NAME_NUMBER_OK: 37, //发送来电名字和号码 OK
+  IS_SUPPOERT_PUSH_CONTENT: 38, //调用sendKeyReadIsHasContentPush查询是否支持内容推送后，如果有这个返回值，则表示支持内容推送
+
+  BLE_SERVICE_START_OK: 39, //BluetoothLeService 服务开启完 成后回调.前 是:需在 BluetoothLeService 服务开启完成前设置监听，否则无回调
+  PASSWORD_SET: 40, //没设置过密码，请设置 4 位数字密码
+  PASSWORD_INPUT: 41, //已设置过密码，请输入已设置的 4 位数字 密码
+  PASSWORD_AUTHENTICATION_OK: 42, //验证成功或者设置密码成 功
+  PASSWORD_INPUT_AGAIN: 43, //验证失败或者设置密码失败，请重 新输入 4 位数字密码，如果已设置过密码，请输入已设置的密码
+  OFFLINE_SWIM_SYNCING: 44,//游泳数据同步中
+  OFFLINE_SWIM_SYNC_OK: 45,//游泳数据同步完成
+  OFFLINE_BLOOD_PRESSURE_SYNCING: 46,//血压数据同步中
+  OFFLINE_BLOOD_PRESSURE_SYNC_OK: 47,//血压数据同步完成
+  BLOOD_PRESSURE_TEST_TIME_OUT: 48,//血压检测超时
+  BLOOD_PRESSURE_TEST_ERROR: 49,//血压检测错误
+  BLOOD_PRESSURE_TEST_STAT: 50,//血压检测开始
+  SEVEN_DAY_WEATHER_SYNC_SUCCESS: 51,//7天天气同步完成
+};
 /*
  1） 如已连接设备 isHasExtra = NO，请使用 UTEOptionHangup/ UTEOptionHangup 设置，即
  自行监听来电， 但是 iOS9 系统以上已经不支持后台监听来电状态；
@@ -389,5 +638,5 @@ if (!window.plugins) {
 if (!window.plugins.SmartBand) {
   window.plugins.SmartBand = new SmartBand()
 }
-cordova.fireDocumentEvent('SmartBand.HeytzICallback', window.plugins.SmartBand.HeytzICallback);
+// cordova.fireDocumentEvent('SmartBand.HeytzICallback', window.plugins.SmartBand.HeytzICallback);
 module.exports = new SmartBand();
