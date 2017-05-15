@@ -13,6 +13,7 @@
             </feature>
         </config-file>
         <source-file src="src/ios/SmartBand.m"/>
+        <source-file src="src/ios/SmartBand.h"/>
 
         <header-file src="src/ios/lib/include/UTESmartBandClient/UTESmartBandClient.h"/>
         <source-file src="src/ios/lib/libUTESmartBandClient.a" framework="true"/>
