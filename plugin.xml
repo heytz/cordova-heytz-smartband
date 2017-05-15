@@ -28,23 +28,20 @@
         </config-file>
         <config-file parent="/manifest" target="AndroidManifest.xml">
             <!-- Required  一些系统要求的权限-->
-            <uses-feature
-                    android:name="android.hardware.bluetooth_le"
-                    android:required="false"/>
-            <uses-permission android:name="android.permission.BLUETOOTH" android:required="false"/>
-            <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:required="false"/>
-            <uses-permission android:name="android.permission.WAKE_LOCK" android:required="false"/>
-            <!--<uses-permission android:name="android.permission.INTERNET" android:required="false"/>-->
-            <uses-permission android:name="android.permission.INTERNET" />
-            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:required="false"/>
-            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" android:required="false"/>
-            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" android:required="false"/>
-            <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" android:required="false"/>
-            <uses-permission android:name="android.permission.WRITE_SETTINGS" android:required="false"/>
-            <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" android:required="false"/>
-            <uses-permission android:name="android.permission.GET_TASKS" android:required="false"/>
-            <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" android:required="false"/>
-            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:required="false"/>
+            <uses-feature android:name="android.hardware.bluetooth_le"/>
+            <uses-permission android:name="android.permission.BLUETOOTH"/>
+            <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+            <uses-permission android:name="android.permission.WAKE_LOCK"/>
+            <uses-permission android:name="android.permission.INTERNET"/>
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+            <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL"/>
+            <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+            <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+            <uses-permission android:name="android.permission.GET_TASKS"/>
+            <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
         </config-file>
 
         <config-file parent="/manifest/application" target="AndroidManifest.xml">
@@ -70,6 +67,6 @@
         <!--<source-file src="src/android/lib/android-support-v4.jar" target-dir="libs"/>-->
         <source-file src="src/android/lib/ute_sdk_v2.4.0.jar" target-dir="libs"/>
         <source-file src="src/android/lib/armeabi/libAesJni.so" target-dir="libs/armeabi"/>
-        <framework src="com.android.support:support-v4:24.1.1+" />
+        <framework src="com.android.support:support-v4:24.1.1+"/>
     </platform>
 </plugin>
