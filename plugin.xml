@@ -12,6 +12,10 @@
                 <param name="ios-package" value="SmartBand"/>
             </feature>
         </config-file>
+        <preference name="BLUETOOTH_USAGE_DESCRIPTION" default=" "/>
+        <config-file target="*-Info.plist" parent="NSBluetoothPeripheralUsageDescription">
+            <string>$BLUETOOTH_USAGE_DESCRIPTION</string>
+        </config-file>
         <config-file target="*-Info.plist" parent="UIBackgroundModes">
             <array>
                 <string>bluetooth-peripheral</string>
@@ -21,9 +25,7 @@
         <source-file src="src/ios/SmartBand.m"/>
         <source-file src="src/ios/SmartBand.h"/>
 
-        <header-file src="src/ios/lib/include/UTESmartBandClient/UTESmartBandClient.h"/>
-        <source-file src="src/ios/lib/libUTESmartBandClient.a" framework="true"/>
-
+        <framework custom="true" src="src/ios/lib/UTESmartBandApi.framework"/>
         <framework src="SystemConfiguration.framework" weak="true"/>
         <framework src="libsqlite3.tbd" weak="true"/>
     </platform>

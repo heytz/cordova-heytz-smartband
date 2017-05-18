@@ -6,16 +6,15 @@
 //
 //
 #import <Cordova/CDV.h>
-#import "UTESmartBandClient.h"
+@import UTESmartBandApi;
 @interface SmartBand : CDVPlugin <UTEManagerDelegate> {
     // Member variables go here.
-    NSMutableArray *nsArray;
     NSMutableDictionary *_cordovaCallbackDic;
 //     UTEModelDevices *uteModelDevices;
+    NSTimer *scanNsTimer;
 }
-
-- (void)coolMethod:(CDVInvokedUrlCommand *)command;
-
+@property (nonatomic,strong) UTESmartBandClient  *smartBandMgr;
+@property (nonatomic,strong) NSMutableArray *nsArray;
 - (void)scan:(CDVInvokedUrlCommand *)command;
 
 - (void)stop:(CDVInvokedUrlCommand *)command;

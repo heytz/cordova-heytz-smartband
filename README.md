@@ -3,6 +3,10 @@
 
 android版本要求 sdk 最低18 
 
+###IOS
+
+加入  BLUETOOTH_USAGE_DESCRIPTION 默认 " "
+
 #功能列表
     
    [1.初始化](1.初始化) (Android)
@@ -111,7 +115,20 @@ android版本要求 sdk 最低18
     cordova.plugins.Smartband.sendToSetAlarmCommand(whichClock, weekPeroid, hour, minute, isOpen, shakePeriod, success, error)
       
 ##9.设置身高体重
-  
+
+    *  @param heigh  身高 UTEOptionUnitMeter 单位cm  范围格式 <91,240>
+    *                身高 UTEOptionUnitInch 单位inch 范围格式 <3.00,7.11> 3尺00寸 ~ 7尺11寸 (小数点为11进制)
+   
+    *  @param weight 体重 UTEOptionUnitMeter 单位kg 范围格式 <20,150>
+    *                体重 UTEOptionUnitInch 单位lb 范围格式 <44,333>
+    *
+    *  @param sec     亮屏时间(秒) 范围<5,60>
+    *
+    *  @param sportTarget 有的设备支持显示一天的步数进度；如手环不支持，请填非0 值
+    *
+    *  @param handlight   抬手亮屏的开关 请查看isHasHandLight来判断是否支持此功能
+    *
+    *  @param maxHeart    超过最大心率值警报 请查看isHasMaxHeartAlert来判断是否支持此功能，关闭则填255
     cordova.plugins.Smartband.sendStepLenAndWeightToBLE(height, weight, offScreenTime, stepTask, isRraisHandbrightScreenSwitchOpen, isHighestRateOpen, highestRate, success, error)
 
 ##10.同步计步数据
@@ -123,7 +140,7 @@ android版本要求 sdk 最低18
     cordova.plugins.Smartband.syncAllSleepData(success, error)
  
 ##12.查找手环
-  
+    * ios 没有vibrationCount 设置
     cordova.plugins.Smartband.findBand(vibrationCount, success, error)
     
 ##19.恢复出厂设置
