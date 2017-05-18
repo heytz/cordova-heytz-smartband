@@ -50,6 +50,11 @@ public class HeytzUtil {
         }
         return json;
     }
+     /**
+         * @param sleepTimeInfo { AwakeCount:int,awakeTime:int,beginTime:int,deepTime:int,durationTimeArray:[],
+         *                      endTime:int,lightTime:int,sleepStatueArray:[],sleepTotalTime:int,timePointArray:[]}
+         * @return
+         */
     static JSONObject sleepTimeInfoToJSONObject(SleepTimeInfo sleepTimeInfo) {
         JSONObject json = new JSONObject();
         try {

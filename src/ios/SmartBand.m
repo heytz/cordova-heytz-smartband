@@ -2,35 +2,120 @@
 #import "SmartBand.h"
 
 @implementation SmartBand
+//初始化
+NSString *INIT = @"init";
+//扫描
+NSString *SCAN = @"scan";
+//停止扫描
+NSString *STOP = @"stop";
+//是否支持BLE4.0
+NSString *ISSUPPORTED = @"isSupported";
+//判断蓝牙是否打开
+NSString *ISENABLED = @"isEnabled";
+//连接
+NSString *CONNECT = @"connect";
+//断开设备
+NSString *DISCONNECT = @"disConnect";
+//解绑服务
+NSString *UNBINDSERVICE = @"unBindService";
+//写入
+NSString *WRITE = @"write";
+//同步时间
+NSString *SYNCBLETIME = @"syncBLETime";
+//请求蓝牙版本信息
+NSString *SENDTOREADBLEVERSION = @"sendToReadBLEVersion";
+//请求蓝牙电池电量指令
+NSString *SENDTOREADBLEBATTERY = @"sendToReadBLEBattery";
+//同步运动数据
+NSString *SYNCRUNDATA = @"syncRunData";
+//同步睡眠数据
+NSString *SYNCSLEEPDATA = @"syncSleepData";
+//设置 BEL 端步长;体重;灭屏时间;目标步数;抬手亮屏开关 true 为开，false 为关;最高心率 醒，true 为开，false 为关;最后一个参数为最高心率 醒 的值。 醒:修改身高体重后，需要同步一次计步数据，应用上的距离和卡 路里才会按照新修改的身高体重进行计算并更新。
+NSString *SENDSTEPLENANDWEIGHTTOBLE = @"sendStepLenAndWeightToBLE";
+//同步计步数据= @连上设备后，请同步一次步数= @实际是在设置时间后，同步步 数);同步完成前，请不要进行其他任何的通信工作)
+NSString *SYNALLSTEPDATA = @"syncAllStepData";
+//新一天初始化计步数据库
+NSString *UPDATESTEPSQL = @"updateStepSQL";
+//查询一天的总步数
+NSString *QUERYSTEPDATE = @"queryStepDate";
+//查询一天的步数、距离、卡路里
+NSString *QUERYSTEPDINFO = @"queryStepInfo";
+//查询某一天各小时步数
+NSString *QUERYONEHOURSTEPSQL = @"queryOneHourStepSQL";
+//同步睡眠数据= @同步完成前，请不要进行其他任何的通信工作)
+NSString *SYNCALLSLEEPDATA = @"syncAllSleepData";
+//查询一天的睡眠总时间
+NSString *QUERYSLEEPDATE = @"querySleepDate";
+//查询一天的睡眠详情
+NSString *QUERYSLEEPINFO = @"querySleepInfo";
+//打开摇摇功能= @之后发现设备被摇一摇时，会在 ICallback 中返回状态， ICallbackStatus.DISCOVERY_DEVICE_SHAKE)，常用于摇摇拍照等功能的实 现。
+NSString *SHAKEMODE = @"shakeMode";
+//关闭摇摇功能
+NSString *CLOSESHAKEMODE = @"closeShakeMode";
+//清除设备所有数据，即设备恢复出厂设置
+NSString *DELETEDEVICEALLDATA = @"deleteDevicesAllData";
+//发送久坐 醒功能开启/关闭指令以及 醒周期
+NSString *SENDSEDENTARYREMINDCOMMAND = @"sendSedentaryRemindCommand";
+//发送设置闹钟指令
+NSString *SENDTOSETALARMCOMMAND = @"sendToSetAlarmCommand";
+//查找手环
+NSString *FINDBAND = @"findBand";
+//同步数据
+NSString *SYNCALLRATEDATA = @"syncAllRateData";
+//查询设备升级属性 = @升级前必须调用查询)
+NSString *QUERYDEVICEFEARTURE = @"queryDeviceFearture";
+//读取线损值
+NSString *READRSSI = @"readRssi";
+//判断平台
+NSString *ISRKPLATFORM = @"isRKPlatform";
+NSString *GETSERVERBTIMGVERSION = @"getServerBtImgVersion";
+NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 
-- (void)initialize {
-    if (self == [SmartBand class]) {
-        [[UTESmartBandClient sharedInstance] initUTESmartBandClient];
-        nsArray = [NSMutableArray array];
-        _cordovaCallbackDic = [NSMutableDictionary dictionary];
-    }
+- (void)setCallBackId:(NSString *)method callbackId:(NSString *)callbackId {
+    _cordovaCallbackDic[method] = callbackId;
 }
 
-- (void)coolMethod:(CDVInvokedUrlCommand *)command {
-    CDVPluginResult *pluginResult = nil;
-    NSString *echo = [command.arguments objectAtIndex:0];
-    if (echo != nil && [echo length] > 0) {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:echo];
-    } else {
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
-    }
+- (NSString *)getCallBackId:(NSString *)method {
+    return _cordovaCallbackDic[method];
+}
 
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+#ifdef __CORDOVA_4_0_0
+
+- (void)pluginInitialize {
+    NSLog(@"### pluginInitialize ");
+    [self initPlugin];
+}
+
+#else
+
+- (CDVPlugin*)initWithWebView:(UIWebView*)theWebView{
+    NSLog(@"### initWithWebView ");
+    if (self=[super initWithWebView:theWebView]) {
+    }
+    [self initPlugin];
+    return self;
+}
+
+#endif
+
+- (void)initPlugin {
+    if ([UTESmartBandClient sharedInstance].delegate) {
+        [UTESmartBandClient sharedInstance].delegate = self;
+    }
+    [[UTESmartBandClient sharedInstance] debugUTELog];
+    nsArray = [NSMutableArray array];
+    _cordovaCallbackDic = [NSMutableDictionary dictionary];
+
 }
 
 - (void)init:(CDVInvokedUrlCommand *)command {
-    CDVPluginResult *pluginResult = nil;
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command];
+    [[UTESmartBandClient sharedInstance] initUTESmartBandClient];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)scan:(CDVInvokedUrlCommand *)command {
-    _cordovaCallbackDic[@"init"] = command;
+    [self setCallBackId:SCAN callbackId:command.callbackId];
     [nsArray removeAllObjects];
     int time = [command.arguments objectAtIndex:0];
     [[UTESmartBandClient sharedInstance] startScanDevices];
@@ -38,15 +123,23 @@
 
 
 - (void)stop:(CDVInvokedUrlCommand *)command {
+    [self setCallBackId:STOP callbackId:command.callbackId];
     [[UTESmartBandClient sharedInstance] stopScanDevices];
 }
 
 - (void)connect:(CDVInvokedUrlCommand *)command {
+    BOOL isExist = NO;
+    [self setCallBackId:CONNECT callbackId:command.callbackId];
     NSString *address = [command.arguments objectAtIndex:0];
     for (UTEModelDevices *devices in nsArray) {
         if ([[devices address] isEqual:address]) {
-            [[[[UTESmartBandClient sharedInstance] connectedDevicesModel] devices]];
+            isExist = YES;
+            [[UTESmartBandClient sharedInstance] connectUTEModelDevices:devices];
         }
+    }
+    if (!isExist) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"device don't exist"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command];
     }
 }
 
@@ -125,6 +218,8 @@
 - (void)queryDeviceFearture:(CDVInvokedUrlCommand *)command {
 }
 
+//*******************************回调*************************************************
+
 /**
  *  @discussion 每找到一个设备，就会调用一次
  *
@@ -151,7 +246,9 @@
  *  @param error        错误码
  */
 - (void)uteManagerDevicesSate:(UTEDevicesSate)devicesState error:(NSError *)error userInfo:(NSDictionary *)info {
-
+    NSLog(@"state:%ld,error:%ld", (long) devicesState, (long) [error code]);
+    NSString *jsStr = [NSString stringWithFormat:@"cordova.plugins.SmartBand.openHeytzICallback(%ld);", (long) devicesState];
+    [self.commandDelegate evalJs:jsStr];
 }
 
 /**
@@ -160,7 +257,10 @@
  *  @param bluetoothState 蓝牙状态
  */
 - (void)uteManagerBluetoothState:(UTEBluetoothSate)bluetoothState {
-
+    NSString *jsStr = [NSString stringWithFormat:@"cordova.plugins.SmartBand.openHeytzICallback(%ld);", (long) bluetoothState];
+    [self.commandDelegate evalJs:jsStr];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"device don't exist"];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:CONNECT]];
 }
 
 /**

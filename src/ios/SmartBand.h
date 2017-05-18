@@ -7,7 +7,6 @@
 //
 #import <Cordova/CDV.h>
 #import "UTESmartBandClient.h"
-
 @interface SmartBand : CDVPlugin <UTEManagerDelegate> {
     // Member variables go here.
     NSMutableArray *nsArray;
