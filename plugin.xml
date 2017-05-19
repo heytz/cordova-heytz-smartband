@@ -25,7 +25,7 @@
         <source-file src="src/ios/SmartBand.m"/>
         <source-file src="src/ios/SmartBand.h"/>
 
-        <framework custom="true" src="src/ios/lib/UTESmartBandApi.framework"/>
+        <framework src="src/ios/lib/UTESmartBandApi.framework" custom="true"/>
         <framework src="SystemConfiguration.framework" weak="true"/>
         <framework src="libsqlite3.tbd" weak="true"/>
     </platform>

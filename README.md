@@ -112,6 +112,12 @@ android版本要求 sdk 最低18
       
 ##7.智能闹钟
   
+    * whichClock   FIRST_CLOCK: 1,//第一个闹钟 SECOND_CLOCK: 2,//第二个闹钟 THIRD_CLOCK: 3,//第三个闹钟
+    * weekPeroid   sunday monday tuesday wednesday thursday saturday  everyday
+    * hour         闹铃小时(24 小时制，如下午 1 点，hour=13)
+    * minute       闹铃分钟
+    * isOpen       true 打开闹钟;false 关闭闹钟
+    * shakePeriod  手环振动次数，之前直接写死 5 次，现在改为可设 置次数。
     cordova.plugins.Smartband.sendToSetAlarmCommand(whichClock, weekPeroid, hour, minute, isOpen, shakePeriod, success, error)
       
 ##9.设置身高体重
