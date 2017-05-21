@@ -144,9 +144,13 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     } else {
         [_nsArray removeAllObjects];
-        int time = [command.arguments objectAtIndex:0];
         [[self smartBandMgr] startScanDevices];
-
+        NSString *timeStr = [command.arguments objectAtIndex:0];
+        double time = 10;
+        if (timeStr == nil || timeStr == NULL || [timeStr isKindOfClass:[NSNull class]]) {
+        } else {
+            time = [timeStr doubleValue];
+        }
         scanNsTimer = [NSTimer scheduledTimerWithTimeInterval:time
                                                        target:self
                                                      selector:@selector(stopScanTimer:)
@@ -175,6 +179,8 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 - (void)stopScanTimer:(NSTimer *)timer {
     NSLog(@"stopScanTimer");
     [[self smartBandMgr] stopScanDevices];
+    [scanNsTimer invalidate];
+    scanNsTimer = Nil;
 }
 
 /**
@@ -184,9 +190,9 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 - (void)connect:(CDVInvokedUrlCommand *)command {
     BOOL isExist = NO;
     [self setCallBackId:CONNECT callbackId:command.callbackId];
-    NSString *address = [command.arguments objectAtIndex:0];
+    NSString *identifier = [command.arguments objectAtIndex:0];
     for (UTEModelDevices *devices in _nsArray) {
-        if ([[devices address] isEqual:address]) {
+        if ([[devices identifier] isEqual:identifier]) {
             isExist = YES;
             [[UTESmartBandClient sharedInstance] connectUTEModelDevices:devices];
         }
@@ -441,16 +447,28 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
  *  @param modelDevices 设备属性模型
  */
 - (void)uteManagerDiscoverDevices:(UTEModelDevices *)modelDevices {
-    for (UTEModelDevices *devices in _nsArray) {
-        if ([[devices address] isEqual:[modelDevices address]]) {
-            [_nsArray removeObject:modelDevices];
+    BOOL sameDevices = NO;
+    for (UTEModelDevices *model in self.nsArray) {
+        if ([model.identifier isEqualToString:modelDevices.identifier]) {
+            model.rssi = modelDevices.rssi;
+            model.name = modelDevices.name;
+            sameDevices = YES;
+            break;
         }
     }
-    [_nsArray arrayByAddingObject:modelDevices];
-    if ([_cordovaCallbackDic valueForKey:@"scan"]) {
-        CDVPluginResult *pluginResult = nil;
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:_nsArray];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:[_cordovaCallbackDic valueForKey:@"scan"]];
+    
+    if (!sameDevices) {
+        NSLog(@"***扫描到的设备name=%@ id=%@", modelDevices.name, modelDevices.identifier);
+        [_nsArray addObject:modelDevices];
+    }
+    if ([_cordovaCallbackDic valueForKey:SCAN]) {
+        NSMutableArray *jsonArray = [[NSMutableArray alloc] init];
+        for (UTEModelDevices *device in _nsArray) {
+            [jsonArray addObject:[self deviceToDic:device]];
+        }
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:jsonArray];
+        [pluginResult setKeepCallbackAsBool:true];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:[_cordovaCallbackDic valueForKey:SCAN]];
     }
 }
 
@@ -618,7 +636,7 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 //            @"distances": runData.distances,
 //                      @"hourCalories": runData.hourCalories,
 //            @"hourDistances": runData.hourCalories
-                      };
+    };
     NSString *jsStr = [NSString stringWithFormat:@"cordova.plugins.SmartBand.openOnStepChange(%s);", str];
     [self.commandDelegate evalJs:jsStr];
 }
@@ -793,4 +811,23 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
     }
 }
 
+/**
+ * 设备转换成dictionary
+ * @param device
+ * @return
+ */
+- (NSDictionary *)deviceToDic:(UTEModelDevices *)device {
+    NSNumber *rssi = [NSNumber numberWithInteger:[device rssi]];
+    //设备蓝牙地址，只有连接上设备才有值
+    NSString *address = [[NSString alloc] initWithData:device.address encoding:NSUTF8StringEncoding];
+    NSString *version = [device version];
+    if (version == nil) {
+        version = @"";
+    }
+    NSMutableDictionary *d = [@{@"id": device.identifier,
+            @"name": device.name,
+            @"rssi": rssi,
+            @"address": address, @"version": version} mutableCopy];
+    return d;
+}
 @end
