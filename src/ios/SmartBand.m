@@ -360,10 +360,10 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 }
 
 - (void)deleteDevicesAllData:(CDVInvokedUrlCommand *)command {
-    [self setCallBackId:FINDBAND callbackId:command.callbackId];
+    [self setCallBackId:DELETEDEVICEALLDATA callbackId:command.callbackId];
     [self.smartBandMgr setUTEOption:UTEOptionDeleteDevicesAllData];
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:FINDBAND]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:DELETEDEVICEALLDATA]];
 }
 
 /**
@@ -373,14 +373,19 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 - (void)sendToReadBLEBattery:(CDVInvokedUrlCommand *)command {
     [self setCallBackId:SENDTOREADBLEBATTERY callbackId:command.callbackId];
     [self.smartBandMgr setUTEOption:UTEOptionReadDevicesBattery];
-
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:[[self.smartBandMgr connectedDevicesModel] battery]];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:FINDBAND]];
+    int battery = [[self.smartBandMgr connectedDevicesModel] battery];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:battery];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SENDTOREADBLEBATTERY]];
 }
 
+/**
+ * 读取版本
+ * @param command
+ */
 - (void)sendToReadBLEVersion:(CDVInvokedUrlCommand *)command {
     [self setCallBackId:SENDTOREADBLEVERSION callbackId:command.callbackId];
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:[[self.smartBandMgr connectedDevicesModel] version]];
+    NSString *version = [[self.smartBandMgr connectedDevicesModel] version];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:version];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SENDTOREADBLEVERSION]];
 }
 
@@ -456,7 +461,7 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
             break;
         }
     }
-    
+
     if (!sameDevices) {
         NSLog(@"***扫描到的设备name=%@ id=%@", modelDevices.name, modelDevices.identifier);
         [_nsArray addObject:modelDevices];
@@ -483,7 +488,13 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
         NSLog(@"***错误码=%ld,msg=%@", (long) error.code, error.domain);
     }
     NSLog(@"state:%ld,error:%ld", (long) devicesState, (long) [error code]);
-    NSString *jsStr = [NSString stringWithFormat:@"cordova.plugins.SmartBand.openHeytzICallback(%ld);", (long) devicesState];
+    NSString *jsStr = [NSString stringWithFormat:@"cordova.plugins.SmartBand.openHeytzICallback(%ld);",
+                                                 (long) devicesState];
+    if (info != nil) {
+        jsStr = [NSString stringWithFormat:@"cordova.plugins.SmartBand.openHeytzICallback(%ld,%@);",
+                                           (long) devicesState,
+                                           [[NSString alloc] initWithData:[self toJSONData:info] encoding:NSUTF8StringEncoding]];
+    }
     [self.commandDelegate evalJs:jsStr];
     switch (devicesState) {
         case UTEDevicesSateConnected: {
@@ -502,10 +513,11 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
         }
         case UTEDevicesSateSyncBegin: {
             //相应处理
-            NSLog(@"***设备同步开始");
+            NSLog(@"***设备在同步数据开始***");
             break;
         }
         case UTEDevicesSateSyncSuccess: {
+            NSLog(@"***设备在同步数据结束***");
             [self syncSucess:info];
             break;
         }
@@ -829,5 +841,18 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
             @"rssi": rssi,
             @"address": address, @"version": version} mutableCopy];
     return d;
+}
+
+- (NSData *)toJSONData:(NSDictionary *)theData {
+    NSError *error = nil;
+    if (theData == nil) {return @"{}";};
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:theData
+                                                       options:NSJSONWritingPrettyPrinted
+                                                         error:&error];
+    if ([jsonData length] == 0 & error == nil) {
+        return jsonData;
+    } else {
+        return nil;
+    }
 }
 @end
