@@ -6,6 +6,11 @@
     <js-module name="SmartBand" src="www/SmartBand.js">
         <clobbers target="cordova.plugins.SmartBand"/>
     </js-module>
+    <info>
+        注：
+        请使用cordova 7.0.0 以上版本build，如果你版本不够7.0.0 请对IOS做一下设置
+        打开General ---> Embedded Binaries --> + -->选中 UTESmartBandApi.framework
+    </info>
     <platform name="ios">
         <config-file parent="/*" target="config.xml">
             <feature name="SmartBand">
