@@ -128,16 +128,16 @@ SmartBand.prototype.stop = function (success, error) {
  * @param success
  * @param error
  */
-SmartBand.prototype.connect = function (address, success, error) {
-  this.callNative("connect", [address], success, error);
+SmartBand.prototype.connect = function (identifier, success, error) {
+  this.callNative("connect", [identifier], success, error);
 };
 /**
  * 断开设备
  * @param success
  * @param error
  */
-SmartBand.prototype.disConnect = function (success, error) {
-  this.callNative("disConnect", [], success, error);
+SmartBand.prototype.disConnect = function (identifier,success, error) {
+  this.callNative("disConnect", [identifier], success, error);
 };
 /**
  * 同步时间
