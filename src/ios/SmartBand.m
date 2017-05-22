@@ -552,18 +552,19 @@ NSString *OPENREMIND = @"openRemind";
 }
 
 - (void)openRemind:(CDVInvokedUrlCommand *)command {
-    BOOL *state = [command.arguments[0] pointerValue];
-    NSString *type = command.arguments[0];
+    [self setCallBackId:OPENREMIND callbackId:command.callbackId];
+    BOOL state =[command.arguments[0] boolValue];
+    NSString *type = command.arguments[1];
     if (state) {
-        if (type == @"incall") {
+        if ([type  isEqual: @"incall"]) {
             [self.smartBandMgr setUTEOption:UTEOptionOpenRemindIncall];
-        } else if (type == @"qq") {
+        } else if ([type  isEqual: @"qq"]) {
             [self.smartBandMgr setUTEOption:UTEOptionOpenRemindQQ];
-        } else if (type == @"weixin") {
+        } else if ([type  isEqual: @"weixin"]) {
             [self.smartBandMgr setUTEOption:UTEOptionOpenRemindWeixin];
-        } else if (type == @"sms") {
+        } else if ([type  isEqual: @"sms"]) {
             [self.smartBandMgr setUTEOption:UTEOptionOpenRemindSms];
-        } else if (type == @"more") {
+        } else if ([type  isEqual: @"more"]) {
             [self.smartBandMgr setUTEOption:UTEOptionOpenRemindMore];
         } else {
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
@@ -571,15 +572,15 @@ NSString *OPENREMIND = @"openRemind";
             [self sendPluginResult:pluginResult callbackId:command.callbackId];
         }
     } else {
-        if (type == @"incall") {
+        if ([type  isEqual: @"incall"]) {
             [self.smartBandMgr setUTEOption:UTEOptionCloseRemindIncall];
-        } else if (type == @"qq") {
+        } else if ([type  isEqual: @"qq"]) {
             [self.smartBandMgr setUTEOption:UTEOptionCloseRemindQQ];
-        } else if (type == @"weixin") {
+        } else if ([type  isEqual: @"weixin"]) {
             [self.smartBandMgr setUTEOption:UTEOptionCloseRemindWeixin];
-        } else if (type == @"sms") {
+        } else if ([type  isEqual: @"sms"]) {
             [self.smartBandMgr setUTEOption:UTEOptionCloseRemindSms];
-        } else if (type == @"more") {
+        } else if ([type  isEqual: @"more"]) {
             [self.smartBandMgr setUTEOption:UTEOptionCloseRemindMore];
         } else {
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
