@@ -2,6 +2,7 @@
 #import "SmartBand.h"
 
 @interface SmartBand ()
+
 - (UTEModelDevices *)findDevice:(NSString *)identifier;
 @end
 
@@ -76,6 +77,8 @@ NSString *READRSSI = @"readRssi";
 NSString *ISRKPLATFORM = @"isRKPlatform";
 NSString *GETSERVERBTIMGVERSION = @"getServerBtImgVersion";
 NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
+NSString *BEGINUPDATEFIRMWARE = @"beginUpdateFirmware";
+NSString *UPDATEFIRMWARE = @"updateFirmware";
 
 - (void)setCallBackId:(NSString *)method callbackId:(NSString *)callbackId {
     _cordovaCallbackDic[method] = callbackId;
@@ -120,6 +123,7 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
     //    self.smartBandMgr.filerRSSI = -99;
     //6. 重复扫描设备(这样设备信号值才会实时变化)
     self.smartBandMgr.isScanRepeat = YES;
+    self.isMustUpdate = NO;
 
     NSLog(@"sdk vsersion =%@", self.smartBandMgr.sdkVersion);
     if (!_nsArray) {
@@ -490,6 +494,36 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 - (void)isSupported:(CDVInvokedUrlCommand *)command {
 }
 
+- (void)beginUpdateFirmware:(CDVInvokedUrlCommand *)command {
+    [self setCallBackId:BEGINUPDATEFIRMWARE callbackId:command.callbackId];
+    [self.smartBandMgr beginUpdateFirmware];
+}
+
+/**
+ * 开始升级
+ * @param command
+ */
+- (void)updateFirmware:(CDVInvokedUrlCommand *)command {
+    self.isMustUpdate = NO;
+    [self setCallBackId:UPDATEFIRMWARE callbackId:command.callbackId];
+    [self.smartBandMgr changeDeviveFeature:^(BOOL isSuccess, BOOL isMustUpdate) {
+        //1.先检查这个属性，必须强制升级固件，因为之前升级固件把固件烧坏了
+        if(isMustUpdate){
+            //开始自动后台检查环境，然后强制升级
+            [self.smartBandMgr checkUTEFirmwareVersion];
+            self.isMustUpdate = YES;
+            NSLog(@"***必须强制升级固件，因为之前升级固件把固件烧坏了，造成一些功能无法使用");
+            return ;
+        }//2.然后检查这个属性
+        if (isSuccess) {
+            NSLog(@"***打开升级功能成功，开始升级");
+            [self.smartBandMgr beginUpdateFirmware];
+        }else{
+            NSLog(@"***是打开了升级功能，但是连接失败，超时了，可重新调用checkUTEFirmwareVersion，然后升级");
+        }
+    }];
+}
+
 /**
  * 设备是否为RK平台手环(可事先问相关人员,是否有这设备)，设备断开情况下为false
  * @param command
@@ -501,7 +535,10 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 }
 
 - (void)getServerBtImgVersion:(CDVInvokedUrlCommand *)command {
+    [self setCallBackId:GETSERVERBTIMGVERSION callbackId:command.callbackId];
+    [[self smartBandMgr] checkUTEFirmwareVersion];
 }
+
 
 - (void)getServerPatchVersion:(CDVInvokedUrlCommand *)command {
 }
@@ -615,27 +652,46 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
             break;
         }
         case UTEDevicesSateCheckFirmwareError: {
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.domain];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:GETSERVERBTIMGVERSION]];
             //相应处理
             break;
         }
         case UTEDevicesSateUpdateHaveNewVersion: {
-            //相应处理
+            if (self.isMustUpdate) {
+                [self.smartBandMgr beginUpdateFirmware];
+            }
+            //相应处理 todo 不知道如何去取版本号
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@""];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:GETSERVERBTIMGVERSION]];
             break;
         }
         case UTEDevicesSateUpdateNoNewVersion: {
             //相应处理
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"no new version"];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:GETSERVERBTIMGVERSION]];
             break;
         }
         case UTEDevicesSateUpdateBegin: {
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"{state:'begin'}"];
+            [pluginResult setKeepCallbackAsBool:true];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:UPDATEFIRMWARE]];
+
             //相应处理
             break;
         }
         case UTEDevicesSateUpdateSuccess: {
             //相应处理
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"{state:'success'}"];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:UPDATEFIRMWARE]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:BEGINUPDATEFIRMWARE]];
             break;
         }
         case UTEDevicesSateUpdateError: {
             //相应处理
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.domain];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:UPDATEFIRMWARE]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:BEGINUPDATEFIRMWARE]];
             break;
         }
         case UTEDevicesSateHeartDetectingProcess: {
@@ -771,7 +827,10 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
  *  @param process 进度(0到100)
  */
 - (void)uteManagerUpdateProcess:(NSInteger)process {
-
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[NSString stringWithFormat:@"{process:%d}", process]];
+    [pluginResult setKeepCallbackAsBool:true];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:UPDATEFIRMWARE]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:BEGINUPDATEFIRMWARE]];
 }
 
 /**

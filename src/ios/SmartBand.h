@@ -17,6 +17,7 @@
 @property(nonatomic, strong) UTESmartBandClient *smartBandMgr;
 @property(nonatomic, strong) NSMutableArray *nsArray;
 @property(nonatomic, strong) NSDictionary *tempDataAll;
+@property(nonatomic) BOOL isMustUpdate;
 
 
 - (void)scan:(CDVInvokedUrlCommand *)command;
@@ -70,6 +71,12 @@
 - (void)isRKPlatform:(CDVInvokedUrlCommand *)command;
 
 - (void)getServerBtImgVersion:(CDVInvokedUrlCommand *)command;
+
+- (void)beginUpdateFirmware:(CDVInvokedUrlCommand *)command;
+
+- (void)changeDeviveFeature:(CDVInvokedUrlCommand *)command;
+
+- (void)updateFirmware:(CDVInvokedUrlCommand *)command;
 
 - (void)getServerPatchVersion:(CDVInvokedUrlCommand *)command;
 
