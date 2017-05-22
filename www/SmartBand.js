@@ -3,10 +3,21 @@ var exec = require('cordova/exec');
 var SmartBand = function () {
 };
 SmartBand.prototype.onServerCallback = {};
+/**
+ * 手机server监听
+ * @type {{}}
+ */
 SmartBand.prototype.onServiceStatuslt = {};
 SmartBand.prototype.heytzICallback = {};
 SmartBand.prototype.onStepChange = {};
+/**
+ * IOS 下 实时监听了设备睡眠记录变化 只会返回true 或者 false
+ * 如有新的睡眠记录，请先同步睡眠记录（因为要过滤是否在真正的睡觉），再查询历史睡眠记录
+ * 最好早上同步睡眠数据，因为这时候睡眠数据才是完整的，而且同步睡眠需要时间比较久
+ * @type {{}}
+ */
 SmartBand.prototype.onSleepChange = {};
+SmartBand.prototype.onUTEOptionCallBack = {};
 
 /**
  * 固件升级访问服务器回调类
@@ -48,6 +59,12 @@ SmartBand.prototype.openOnStepChange = function (data) {
 SmartBand.prototype.openOnSleepChange = function () {
   cordova.fireDocumentEvent('SmartBand.onSleepChange', this.onSleepChange)
 };
+/**
+ * 设备Option设置的CallBack，只在IOS上面存在
+ */
+SmartBand.prototype.uteManageUTEOptionCallBack = function () {
+  cordova.fireDocumentEvent('SmartBand.onUTEOptionCallBack', this.onUTEOptionCallBack)
+};
 
 SmartBand.prototype.errorCallback = function (msg) {
   console.log('Javascript Callback Error: ' + msg)
@@ -64,8 +81,21 @@ SmartBand.prototype.callNative = function (name, args, successCallback, errorCal
 SmartBand.prototype.init = function (success, error) {
   this.callNative("init", [], success, error);
 };
+/**
+ * 检查蓝牙是否开启
+ * @param success
+ * @param error
+ */
 SmartBand.prototype.isEnabled = function (success, error) {
   this.callNative("isEnabled", [], success, error);
+};
+/**
+ * 检查是否可以发送 UTEOption 等等对设备的设置
+ * @param success 设备在未打开手机蓝牙、未连接设备、正在同步中、正在测试心率/血压中、转化设备特性，返回false，设置是无效的，即设备不处理。
+ * @param error
+ */
+SmartBand.prototype.checkUTEDevicesStateIsEnable = function (success, error) {
+  this.callNative("checkUTEDevicesStateIsEnable", [], success, error);
 };
 /**
  * 是否支持BLE4.0
@@ -305,8 +335,50 @@ SmartBand.prototype.getServerPatchVersion = function (success, error) {
 SmartBand.prototype.queryDeviceFearture = function (success, error) {
   this.callNative("queryDeviceFearture", [], success, error);
 };
+/**
+ * 同步所有数据   仅 IOS
+ * @param success
+ * @param error
+ */
+SmartBand.prototype.syncAllData = function (success, error) {
+  this.callNative("syncAllData", [], success, error);
+};
+/**
+ * 检查是否可以发送   仅 IOS
+ * @param success
+ * @param error
+ */
+SmartBand.prototype.checkUTEDevicesStateIsEnable = function (success, error) {
+  this.callNative("checkUTEDevicesStateIsEnable", [], success, error);
+};
 
-device = {
+//-------------------------下面接口暂时不实现----------------------
+/**
+ * 设置闹铃震动次数，暂时不实现
+ * @param success
+ * @param error
+ */
+SmartBand.prototype.setUTEAlarmArray = function (success, error) {
+  this.callNative("setUTEAlarmArray", [], success, error);
+};
+/**
+ * 设置身高单位
+ * @param success
+ * @param error
+ */
+SmartBand.prototype.setHeighUnit = function (success, error) {
+  this.callNative("setHeighUnit", [], success, error);
+};
+/**
+ * 设置体重单位
+ * @param success
+ * @param error
+ */
+SmartBand.prototype.setWeightUnit = function (success, error) {
+  this.callNative("setWeightUnit", [], success, error);
+};
+
+var device = {
   name: "设备名称",//NSString
   version: "设备版本：连接状态才有值",
   identifier: "设备唯一标识",
@@ -319,7 +391,7 @@ device = {
   featureAnother: "",// 设备另外特性，只有连上设备才有实际值：不同的特性支持不同的功能， 请看 UTEDeviceFeature 枚举
   advertisementData: "设备未被连接时， 此属性有值， 否则为空" //UTEModelDevices
 };
-
+//仅IOS 返回设备 options的操作状态
 SmartBandOptions = {
   UTEOptionSyncAllStepsData: 0,        //同步设备所有步数
   UTEOptionSyncAllSleepData: 1,        //同步设备所有睡眠
@@ -555,6 +627,7 @@ GlobalVariable = {
   SHOW_VERTICAL_ENGLISH_SCREEN: 1,// 显示竖屏英文界面
   SHOW_VERTICAL_CHINESE_SCREEN: 2,// 显示竖屏中文界面
 };
+//仅Android 返回设备的操作状态
 ICallBackSatatus = {
   REAL_TIME_STEP: 0,//当前属于实时步数操作
   OFFLINE_STEP_SYNCING: 1,//离线步数同步中

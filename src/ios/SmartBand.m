@@ -1,6 +1,10 @@
 /********* cordova-heytz-smartband.m Cordova Plugin Implementation *******/
 #import "SmartBand.h"
 
+@interface SmartBand ()
+- (UTEModelDevices *)findDevice:(NSString *)identifier;
+@end
+
 @implementation SmartBand
 //初始化
 NSString *INIT = @"init";
@@ -62,6 +66,8 @@ NSString *SENDTOSETALARMCOMMAND = @"sendToSetAlarmCommand";
 NSString *FINDBAND = @"findBand";
 //同步数据
 NSString *SYNCALLRATEDATA = @"syncAllRateData";
+//同步所有数据
+NSString *SYNCALLDATA = @"syncAllData";
 //查询设备升级属性 = @升级前必须调用查询)
 NSString *QUERYDEVICEFEARTURE = @"queryDeviceFearture";
 //读取线损值
@@ -121,6 +127,9 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
     }
     if (!_cordovaCallbackDic) {
         _cordovaCallbackDic = [NSMutableDictionary dictionary];
+    }
+    if (!_tempDataAll) {
+        _tempDataAll = [NSMutableDictionary dictionary];
     }
 }
 
@@ -188,20 +197,38 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
  * @param command
  */
 - (void)connect:(CDVInvokedUrlCommand *)command {
-    BOOL isExist = NO;
     [self setCallBackId:CONNECT callbackId:command.callbackId];
     NSString *identifier = [command.arguments objectAtIndex:0];
-    for (UTEModelDevices *devices in _nsArray) {
-        if ([[devices identifier] isEqual:identifier]) {
-            isExist = YES;
-            [[UTESmartBandClient sharedInstance] connectUTEModelDevices:devices];
-        }
-    }
-    if (!isExist) {
+    UTEModelDevices *devices = [self findDevice:identifier];
+    if (devices != nil) {
+        [[UTESmartBandClient sharedInstance] connectUTEModelDevices:devices];
+    } else {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"device don't exist"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }
 }
+
+/**
+ * 断开设备
+ * 蓝牙未打开、设备未连接 是可以执行；正在同步中、正在测试心率中、转化设备特性、Apdu交互中不执行
+ * @param command [identifier]
+ */
+- (void)disConnect:(CDVInvokedUrlCommand *)command {
+    [self setCallBackId:DISCONNECT callbackId:command.callbackId];
+    NSString *identifier = [command.arguments objectAtIndex:0];
+    UTEModelDevices *devices = [self findDevice:identifier];
+    if (devices != nil) {
+        BOOL state = [self.smartBandMgr disConnectUTEModelDevices:devices];
+        if (!state) {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        }
+    } else {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"device don't exist"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }
+}
+
 
 /**
  * 久坐提醒
@@ -215,9 +242,9 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 //        remindTime: 久坐多长时间就设备震动提醒(震动 2 秒,静止 2 秒 反复 3 次)
         [self.smartBandMgr setUTESitRemindOpenTime:remindTime];
         //设置设备特征
-//        [self.smartBandMgr setUTEOption:UTECallBackOpenUnitSitRemind];
+        [self.smartBandMgr setUTEOption:UTECallBackOpenUnitSitRemind];
     } else {
-
+        //todo 究竟使用哪种？
         [self.smartBandMgr setUTESitRemindClose];
 //        [self.smartBandMgr setUTEOption:UTECallBackCloseSitRemind];
     }
@@ -245,6 +272,7 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
  * @param command
  */
 - (void)sendToSetAlarmCommand:(CDVInvokedUrlCommand *)command {
+    [self setCallBackId:SENDTOSETALARMCOMMAND callbackId:command.callbackId];
     int timerNum = [command.arguments[0] intValue];
     NSString *week = command.arguments[1];
     NSString *hour = command.arguments[2];
@@ -252,7 +280,7 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
     Boolean state = (Boolean) [command.arguments objectAtIndex:4];
     int shakePeriod = [[command.arguments objectAtIndex:5] intValue];
     UTEModelAlarm *model1 = [[UTEModelAlarm alloc] init];
-    model1.time = [NSString stringWithFormat:@"%s:%s", hour, min];
+    model1.time = [NSString stringWithFormat:@"%@:%@", hour, min];
     if ([week isEqualToString:@"everyday"]) {
         model1.week = UTEAlarmWeekMonday | UTEAlarmWeekTuesday | UTEAlarmWeekWednesday
                 | UTEAlarmWeekThursday | UTEAlarmWeekFriday | UTEAlarmWeekSaturday | UTEAlarmWeekSunday;
@@ -269,6 +297,8 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
                 model1.week |= UTEAlarmWeekWednesday;
             } else if ([weekArr[i] isEqualToString:@"thursday"]) {
                 model1.week |= UTEAlarmWeekThursday;
+            } else if ([weekArr[i] isEqualToString:@"friday"]) {
+                model1.week |= UTEAlarmWeekFriday;
             } else if ([weekArr[i] isEqualToString:@"saturday"]) {
                 model1.week |= UTEAlarmWeekSaturday;
             }
@@ -325,9 +355,19 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
                              handlight:handLight maxHeart:maxHeart];
 }
 
+/**
+ * 同步所有数据
+ * @param command
+ */
 - (void)syncAllData:(CDVInvokedUrlCommand *)command {
-//    [self setCallBackId:SYNCALLRATEDATA callbackId:command.callbackId];
-    [self.smartBandMgr setUTEOption:UTEOptionSyncAllData];
+    [self setCallBackId:SYNCALLDATA callbackId:command.callbackId];
+    if ([self.smartBandMgr setUTEOption:UTEOptionSyncAllData]) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    } else {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }
 }
 
 /**
@@ -336,7 +376,13 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
  */
 - (void)syncAllStepData:(CDVInvokedUrlCommand *)command {
     [self setCallBackId:SYNCALLRATEDATA callbackId:command.callbackId];
-    [self.smartBandMgr setUTEOption:UTEOptionSyncAllStepsData];
+    if ([self.smartBandMgr setUTEOption:UTEOptionSyncAllStepsData]) {
+
+    } else {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLRATEDATA]];
+
+    }
 }
 
 /**
@@ -359,6 +405,10 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
     [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:FINDBAND]];
 }
 
+/**
+ * 清空所有数据
+ * @param command
+ */
 - (void)deleteDevicesAllData:(CDVInvokedUrlCommand *)command {
     [self setCallBackId:DELETEDEVICEALLDATA callbackId:command.callbackId];
     [self.smartBandMgr setUTEOption:UTEOptionDeleteDevicesAllData];
@@ -389,14 +439,29 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
     [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SENDTOREADBLEVERSION]];
 }
 
+/**
+ * 同步时间
+ * @param command
+ */
 - (void)syncBLETime:(CDVInvokedUrlCommand *)command {
     [self setCallBackId:SYNCBLETIME callbackId:command.callbackId];
     if ([self.smartBandMgr checkUTEDevicesStateIsEnable]) {
         [self.smartBandMgr setUTEOption:UTEOptionSyncTime];
+    } else {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCBLETIME]];
     }
 }
 
 - (void)isEnabled:(CDVInvokedUrlCommand *)command {
+}
+
+//检查是否可以发送 UTEOption 等等对设备的设置
+//设备在未打开手机蓝牙、未连接设备、正在同步中、正在测试心率/血压中、转化设备特性，返回false，设置是无效的，即设备不处理。
+- (void)checkUTEDevicesStateIsEnable:(CDVInvokedUrlCommand *)command {
+    BOOL enabled = [[self smartBandMgr] checkUTEDevicesStateIsEnable];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:enabled];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)querySleepDate:(CDVInvokedUrlCommand *)command {
@@ -418,9 +483,6 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 - (void)readRssi:(CDVInvokedUrlCommand *)command {
 }
 
-- (void)disConnect:(CDVInvokedUrlCommand *)command {
-//    [self.smartBandMgr disConnectUTEModelDevices:<#(UTEModelDevices *)model#>];
-}
 
 - (void)querySleepInfo:(CDVInvokedUrlCommand *)command {
 }
@@ -428,7 +490,14 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 - (void)isSupported:(CDVInvokedUrlCommand *)command {
 }
 
+/**
+ * 设备是否为RK平台手环(可事先问相关人员,是否有这设备)，设备断开情况下为false
+ * @param command
+ */
 - (void)isRKPlatform:(CDVInvokedUrlCommand *)command {
+    BOOL isRK = [[self smartBandMgr] isRKDevices];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:isRK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)getServerBtImgVersion:(CDVInvokedUrlCommand *)command {
@@ -487,6 +556,7 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
     if (error) {
         NSLog(@"***错误码=%ld,msg=%@", (long) error.code, error.domain);
     }
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     NSLog(@"state:%ld,error:%ld", (long) devicesState, (long) [error code]);
     NSString *jsStr = [NSString stringWithFormat:@"cordova.plugins.SmartBand.openHeytzICallback(%ld);",
                                                  (long) devicesState];
@@ -499,29 +569,48 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
     switch (devicesState) {
         case UTEDevicesSateConnected: {
             //每次连上应该设置一下配置，保证App和设备的信息统一
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:CONNECT]];
             break;
         }
         case UTEDevicesSateDisconnected: {
-
             if (error) {
                 //相应处理
                 NSLog(@"***设备异常断开=%@", error);
             } else {
                 NSLog(@"***设备正常断开connectedDevicesModel=%@", self.smartBandMgr.connectedDevicesModel);
+                [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:DISCONNECT]];
             }
             break;
         }
         case UTEDevicesSateSyncBegin: {
             //相应处理
             NSLog(@"***设备在同步数据开始***");
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"{state:'begin'}"];
+            [pluginResult setKeepCallbackAsBool:true];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLRATEDATA]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLSLEEPDATA]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCSLEEPDATA]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLDATA]];
             break;
         }
         case UTEDevicesSateSyncSuccess: {
             NSLog(@"***设备在同步数据结束***");
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"{state:'success'}"];
+            [pluginResult setKeepCallbackAsBool:true];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLRATEDATA]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLSLEEPDATA]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCSLEEPDATA]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLDATA]];
             [self syncSucess:info];
             break;
         }
         case UTEDevicesSateSyncError: {
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.domain];
+            [pluginResult setKeepCallbackAsBool:true];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLRATEDATA]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLSLEEPDATA]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCSLEEPDATA]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLDATA]];
             //相应处理
             break;
         }
@@ -604,10 +693,8 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
  *  @constant UTEBluetoothSateResetting  手机蓝牙重启
  */
 - (void)uteManagerBluetoothState:(UTEBluetoothSate)bluetoothState {
-    NSString *jsStr = [NSString stringWithFormat:@"cordova.plugins.SmartBand.openHeytzICallback(%ld);", (long) bluetoothState];
+    NSString *jsStr = [NSString stringWithFormat:@"cordova.plugins.SmartBand.onServiceStatuslt(%ld);", (long) bluetoothState];
     [self.commandDelegate evalJs:jsStr];
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"device don't exist"];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:CONNECT]];
     if (bluetoothState == UTEBluetoothSateClose) {//手机蓝牙关闭
 //        if (self.alertView) return;
 //        dispatch_async(dispatch_get_main_queue(), ^{
@@ -615,7 +702,6 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 //            [alert show];
 //            self.alertView = alert;
 //        });
-
     } else if (bluetoothState == UTEBluetoothSateOpen) {//手机蓝牙打开
 //        [self.alertView dismissWithClickedButtonIndex:0 animated:YES];
 //        self.alertView = nil;
@@ -661,7 +747,7 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
  *  @param isNewSleep 是否有新的睡眠数据
  */
 - (void)uteManagerReceiveTodaySleeps:(BOOL)isNewSleep {
-    NSString *jsStr = [NSString stringWithFormat:@"cordova.plugins.SmartBand.openOnSleepChange(%s);", isNewSleep];
+    NSString *jsStr = [NSString stringWithFormat:@"cordova.plugins.SmartBand.openOnSleepChange(%s);", isNewSleep ? "true" : "false"];
     [self.commandDelegate evalJs:jsStr];
 }
 
@@ -671,7 +757,12 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
  *  @param process 进度(0到100)
  */
 - (void)uteManagerSyncProcess:(NSInteger)process {
-
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[NSString stringWithFormat:@"{process:%d}", process]];
+    [pluginResult setKeepCallbackAsBool:true];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLRATEDATA]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLSLEEPDATA]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCSLEEPDATA]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLDATA]];
 }
 
 /**
@@ -697,6 +788,7 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
  *  @discussion SDK对固件发送命令，如固件接收到值，将发送返回值给SDK，如SDK接收到值将回调；否则无
  */
 - (void)uteManageUTEOptionCallBack:(UTECallBack)callback {
+    NSLog(@"***uteManageUTEOptionCallBack*******\ncallback=%ld\n", (long) callback);
     CDVPluginResult *pluginResult = nil;
     switch (callback) {
         case UTECallBackUnit: {
@@ -712,7 +804,9 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
             [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCBLETIME]];
         }
             break;
-        case UTECallBackAlarm: {
+        case UTECallBackAlarm: {//设置闹铃的callback
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:callback];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SENDTOSETALARMCOMMAND]];
         }
             break;
 
@@ -800,16 +894,19 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 
         }
     }
+    NSString *jsStr = [NSString stringWithFormat:@"cordova.plugins.SmartBand.uteManageUTEOptionCallBack(%ld);", (long) callback];
+    [self.commandDelegate evalJs:jsStr];
 }
 
 
 - (void)syncSucess:(NSDictionary *)info {
+    _tempDataAll = info;
     NSLog(@"同步完成");
-    NSArray *arrayRun = info[kUTEQueryRunData];
-    NSArray *arraySleep = info[kUTEQuerySleepData];
-    NSArray *arrayHRM = info[kUTEQueryHRMData];
-    NSArray *arrayBlood = info[kUTEQueryBloodData];
-
+    NSArray *arrayRun = info[kUTEQueryRunData];//步数数据
+    NSArray *arraySleep = info[kUTEQuerySleepData];//睡眠数据
+    NSArray *arrayHRM = info[kUTEQueryHRMData];//心率数据
+    NSArray *arrayBlood = info[kUTEQueryBloodData];//血压数据
+//    NSMutableDictionary *d = [NSMutableDictionary dictionary];
     for (UTEModelRunData *model in arrayRun) {
         NSLog(@"***time = %@, hourStep = %ld,Total step = %ld , distance = %f ,calorie = %f", model.time, (long) model.hourSteps, (long) model.totalSteps, model.distances, model.calories);
     }
@@ -821,6 +918,12 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 
     for (UTEModelBloodData *model in arrayBlood) {
     }
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:info];
+    [pluginResult setKeepCallbackAsBool:true];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLRATEDATA]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLSLEEPDATA]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCSLEEPDATA]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLDATA]];
 }
 
 /**
@@ -855,4 +958,19 @@ NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
         return nil;
     }
 }
+
+/**
+ * 查找设备
+ * @param identifier
+ * @return
+ */
+- (UTEModelDevices *)findDevice:(NSString *)identifier {
+    for (UTEModelDevices *devices in [self nsArray]) {
+        if ([[devices identifier] isEqual:identifier]) {
+            return devices;
+        }
+    }
+    return nil;
+}
+
 @end

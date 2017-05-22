@@ -235,6 +235,8 @@ public class SmartBand extends CordovaPlugin {
                         weekPeroid |= GlobalVariable.WEDNESDAY;
                     } else if (value.equals("thursday")) {
                         weekPeroid |= GlobalVariable.THURSDAY;
+                    } else if (value.equals("friday")) {
+                        weekPeroid |= GlobalVariable.FRIDAY;
                     } else if (value.equals("saturday")) {
                         weekPeroid |= GlobalVariable.SATURDAY;
                     }

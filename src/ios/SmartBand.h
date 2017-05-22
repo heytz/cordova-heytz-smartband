@@ -7,14 +7,18 @@
 //
 #import <Cordova/CDV.h>
 @import UTESmartBandApi;
+
 @interface SmartBand : CDVPlugin <UTEManagerDelegate> {
     // Member variables go here.
     NSMutableDictionary *_cordovaCallbackDic;
 //     UTEModelDevices *uteModelDevices;
     NSTimer *scanNsTimer;
 }
-@property (nonatomic,strong) UTESmartBandClient  *smartBandMgr;
-@property (nonatomic,strong) NSMutableArray *nsArray;
+@property(nonatomic, strong) UTESmartBandClient *smartBandMgr;
+@property(nonatomic, strong) NSMutableArray *nsArray;
+@property(nonatomic, strong) NSDictionary *tempDataAll;
+
+
 - (void)scan:(CDVInvokedUrlCommand *)command;
 
 - (void)stop:(CDVInvokedUrlCommand *)command;
@@ -70,4 +74,8 @@
 - (void)getServerPatchVersion:(CDVInvokedUrlCommand *)command;
 
 - (void)queryDeviceFearture:(CDVInvokedUrlCommand *)command;
+
+- (void)checkUTEDevicesStateIsEnable:(CDVInvokedUrlCommand *)command;
+
+- (void)syncAllData:(CDVInvokedUrlCommand *)command;
 @end
