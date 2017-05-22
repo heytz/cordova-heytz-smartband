@@ -136,7 +136,7 @@ SmartBand.prototype.connect = function (identifier, success, error) {
  * @param success
  * @param error
  */
-SmartBand.prototype.disConnect = function (identifier,success, error) {
+SmartBand.prototype.disConnect = function (identifier, success, error) {
   this.callNative("disConnect", [identifier], success, error);
 };
 /**
@@ -350,6 +350,16 @@ SmartBand.prototype.syncAllData = function (success, error) {
  */
 SmartBand.prototype.checkUTEDevicesStateIsEnable = function (success, error) {
   this.callNative("checkUTEDevicesStateIsEnable", [], success, error);
+};
+/**
+ * 打开提醒         仅 IOS
+ * @param open  true || false
+ * @param type  incall qq weixin sms more
+ * @param success
+ * @param error
+ */
+SmartBand.prototype.openRemind = function (open, type, success, error) {
+  this.callNative("openRemind", [open, type], success, error);
 };
 
 //-------------------------下面接口暂时不实现----------------------

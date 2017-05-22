@@ -86,6 +86,8 @@ android版本要求 sdk 最低18
    [38.同步所有数据](38.同步所有数据)    (IOS(未测试))
    
    [39.检查是否可以发送](39.检查是否可以发送)    (IOS(未测试))
+     
+   [40.打开提醒](40.打开提醒)    (IOS(未测试))
    
     
 
@@ -229,9 +231,13 @@ android版本要求 sdk 最低18
     
      cordova.plugins.Smartband.syncAllData(success,error)
           
-##38.检查是否可以发送
+##39.检查是否可以发送
     
      cordova.plugins.Smartband.checkUTEDevicesStateIsEnable(success,error)
+
+##40.打开提醒
+    
+     cordova.plugins.Smartband.openRemind(open,type,success,error)
           
     
   
