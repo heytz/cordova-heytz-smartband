@@ -85,4 +85,6 @@
 - (void)checkUTEDevicesStateIsEnable:(CDVInvokedUrlCommand *)command;
 
 - (void)syncAllData:(CDVInvokedUrlCommand *)command;
+
+- (void)openRemind:(CDVInvokedUrlCommand *)command;
 @end

@@ -79,6 +79,7 @@ NSString *GETSERVERBTIMGVERSION = @"getServerBtImgVersion";
 NSString *GETSERVERPATCHVERSION = @"getServerPatchVersion";
 NSString *BEGINUPDATEFIRMWARE = @"beginUpdateFirmware";
 NSString *UPDATEFIRMWARE = @"updateFirmware";
+NSString *OPENREMIND = @"openRemind";
 
 - (void)setCallBackId:(NSString *)method callbackId:(NSString *)callbackId {
     _cordovaCallbackDic[method] = callbackId;
@@ -143,7 +144,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
  */
 - (void)init:(CDVInvokedUrlCommand *)command {
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    [self sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 /**
@@ -154,7 +155,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
     [self setCallBackId:SCAN callbackId:command.callbackId];
     if (scanNsTimer) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"The last event did not stop!"];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        [self sendPluginResult:pluginResult callbackId:command.callbackId];
     } else {
         [_nsArray removeAllObjects];
         [[self smartBandMgr] startScanDevices];
@@ -208,7 +209,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
         [[UTESmartBandClient sharedInstance] connectUTEModelDevices:devices];
     } else {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"device don't exist"];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        [self sendPluginResult:pluginResult callbackId:command.callbackId];
     }
 }
 
@@ -225,11 +226,11 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
         BOOL state = [self.smartBandMgr disConnectUTEModelDevices:devices];
         if (!state) {
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+            [self sendPluginResult:pluginResult callbackId:command.callbackId];
         }
     } else {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"device don't exist"];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        [self sendPluginResult:pluginResult callbackId:command.callbackId];
     }
 }
 
@@ -266,7 +267,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
     } else {
         [self.smartBandMgr setUTEOption:UTEOptionCloseCameraMode];
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SHAKEMODE]];
+        [self sendPluginResult:pluginResult callbackId:SHAKEMODE];
     }
 
 }
@@ -367,10 +368,10 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
     [self setCallBackId:SYNCALLDATA callbackId:command.callbackId];
     if ([self.smartBandMgr setUTEOption:UTEOptionSyncAllData]) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        [self sendPluginResult:pluginResult callbackId:command.callbackId];
     } else {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        [self sendPluginResult:pluginResult callbackId:command.callbackId];
     }
 }
 
@@ -384,7 +385,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
 
     } else {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLRATEDATA]];
+        [self sendPluginResult:pluginResult callbackId:SYNCALLRATEDATA];
 
     }
 }
@@ -406,7 +407,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
     [self setCallBackId:FINDBAND callbackId:command.callbackId];
     [self.smartBandMgr setUTEOption:UTEOptionFindBand];
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:FINDBAND]];
+    [self sendPluginResult:pluginResult callbackId:FINDBAND];
 }
 
 /**
@@ -417,7 +418,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
     [self setCallBackId:DELETEDEVICEALLDATA callbackId:command.callbackId];
     [self.smartBandMgr setUTEOption:UTEOptionDeleteDevicesAllData];
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:DELETEDEVICEALLDATA]];
+    [self sendPluginResult:pluginResult callbackId:DELETEDEVICEALLDATA];
 }
 
 /**
@@ -429,7 +430,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
     [self.smartBandMgr setUTEOption:UTEOptionReadDevicesBattery];
     int battery = [[self.smartBandMgr connectedDevicesModel] battery];
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:battery];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SENDTOREADBLEBATTERY]];
+    [self sendPluginResult:pluginResult callbackId:SENDTOREADBLEBATTERY];
 }
 
 /**
@@ -440,7 +441,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
     [self setCallBackId:SENDTOREADBLEVERSION callbackId:command.callbackId];
     NSString *version = [[self.smartBandMgr connectedDevicesModel] version];
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:version];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SENDTOREADBLEVERSION]];
+    [self sendPluginResult:pluginResult callbackId:SENDTOREADBLEVERSION];
 }
 
 /**
@@ -453,7 +454,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
         [self.smartBandMgr setUTEOption:UTEOptionSyncTime];
     } else {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCBLETIME]];
+        [self sendPluginResult:pluginResult callbackId:SYNCBLETIME];
     }
 }
 
@@ -465,7 +466,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
 - (void)checkUTEDevicesStateIsEnable:(CDVInvokedUrlCommand *)command {
     BOOL enabled = [[self smartBandMgr] checkUTEDevicesStateIsEnable];
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:enabled];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    [self sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)querySleepDate:(CDVInvokedUrlCommand *)command {
@@ -508,17 +509,17 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
     [self setCallBackId:UPDATEFIRMWARE callbackId:command.callbackId];
     [self.smartBandMgr changeDeviveFeature:^(BOOL isSuccess, BOOL isMustUpdate) {
         //1.先检查这个属性，必须强制升级固件，因为之前升级固件把固件烧坏了
-        if(isMustUpdate){
+        if (isMustUpdate) {
             //开始自动后台检查环境，然后强制升级
             [self.smartBandMgr checkUTEFirmwareVersion];
             self.isMustUpdate = YES;
             NSLog(@"***必须强制升级固件，因为之前升级固件把固件烧坏了，造成一些功能无法使用");
-            return ;
+            return;
         }//2.然后检查这个属性
         if (isSuccess) {
             NSLog(@"***打开升级功能成功，开始升级");
             [self.smartBandMgr beginUpdateFirmware];
-        }else{
+        } else {
             NSLog(@"***是打开了升级功能，但是连接失败，超时了，可重新调用checkUTEFirmwareVersion，然后升级");
         }
     }];
@@ -531,7 +532,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
 - (void)isRKPlatform:(CDVInvokedUrlCommand *)command {
     BOOL isRK = [[self smartBandMgr] isRKDevices];
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:isRK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    [self sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)getServerBtImgVersion:(CDVInvokedUrlCommand *)command {
@@ -548,6 +549,44 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
 
 - (void)checkUTEFirmwareVersion:(CDVInvokedUrlCommand *)command {
 //    [self.smartBandMgr checkUTEFirmwareVersion];
+}
+
+- (void)openRemind:(CDVInvokedUrlCommand *)command {
+    BOOL *state = [command.arguments[0] pointerValue];
+    NSString *type = command.arguments[0];
+    if (state) {
+        if (type == @"incall") {
+            [self.smartBandMgr setUTEOption:UTEOptionOpenRemindIncall];
+        } else if (type == @"qq") {
+            [self.smartBandMgr setUTEOption:UTEOptionOpenRemindQQ];
+        } else if (type == @"weixin") {
+            [self.smartBandMgr setUTEOption:UTEOptionOpenRemindWeixin];
+        } else if (type == @"sms") {
+            [self.smartBandMgr setUTEOption:UTEOptionOpenRemindSms];
+        } else if (type == @"more") {
+            [self.smartBandMgr setUTEOption:UTEOptionOpenRemindMore];
+        } else {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                                messageAsBool:"This type does not exist!"];
+            [self sendPluginResult:pluginResult callbackId:command.callbackId];
+        }
+    } else {
+        if (type == @"incall") {
+            [self.smartBandMgr setUTEOption:UTEOptionCloseRemindIncall];
+        } else if (type == @"qq") {
+            [self.smartBandMgr setUTEOption:UTEOptionCloseRemindQQ];
+        } else if (type == @"weixin") {
+            [self.smartBandMgr setUTEOption:UTEOptionCloseRemindWeixin];
+        } else if (type == @"sms") {
+            [self.smartBandMgr setUTEOption:UTEOptionCloseRemindSms];
+        } else if (type == @"more") {
+            [self.smartBandMgr setUTEOption:UTEOptionCloseRemindMore];
+        } else {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                                messageAsBool:"This type does not exist!"];
+            [self sendPluginResult:pluginResult callbackId:command.callbackId];
+        }
+    }
 }
 
 //*******************************回调*************************************************
@@ -579,7 +618,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
         }
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:jsonArray];
         [pluginResult setKeepCallbackAsBool:true];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:[_cordovaCallbackDic valueForKey:SCAN]];
+        [self sendPluginResult:pluginResult callbackId:SCAN];
     }
 }
 
@@ -606,7 +645,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
     switch (devicesState) {
         case UTEDevicesSateConnected: {
             //每次连上应该设置一下配置，保证App和设备的信息统一
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:CONNECT]];
+            [self sendPluginResult:pluginResult callbackId:CONNECT];
             break;
         }
         case UTEDevicesSateDisconnected: {
@@ -615,7 +654,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
                 NSLog(@"***设备异常断开=%@", error);
             } else {
                 NSLog(@"***设备正常断开connectedDevicesModel=%@", self.smartBandMgr.connectedDevicesModel);
-                [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:DISCONNECT]];
+                [self sendPluginResult:pluginResult callbackId:DISCONNECT];
             }
             break;
         }
@@ -624,36 +663,36 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
             NSLog(@"***设备在同步数据开始***");
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"{state:'begin'}"];
             [pluginResult setKeepCallbackAsBool:true];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLRATEDATA]];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLSLEEPDATA]];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCSLEEPDATA]];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLDATA]];
+            [self sendPluginResult:pluginResult callbackId:SYNCALLRATEDATA];
+            [self sendPluginResult:pluginResult callbackId:SYNCALLSLEEPDATA];
+            [self sendPluginResult:pluginResult callbackId:SYNCSLEEPDATA];
+            [self sendPluginResult:pluginResult callbackId:SYNCALLDATA];
             break;
         }
         case UTEDevicesSateSyncSuccess: {
             NSLog(@"***设备在同步数据结束***");
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"{state:'success'}"];
             [pluginResult setKeepCallbackAsBool:true];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLRATEDATA]];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLSLEEPDATA]];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCSLEEPDATA]];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLDATA]];
+            [self sendPluginResult:pluginResult callbackId:SYNCALLRATEDATA];
+            [self sendPluginResult:pluginResult callbackId:SYNCALLSLEEPDATA];
+            [self sendPluginResult:pluginResult callbackId:SYNCSLEEPDATA];
+            [self sendPluginResult:pluginResult callbackId:SYNCALLDATA];
             [self syncSucess:info];
             break;
         }
         case UTEDevicesSateSyncError: {
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.domain];
             [pluginResult setKeepCallbackAsBool:true];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLRATEDATA]];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLSLEEPDATA]];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCSLEEPDATA]];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLDATA]];
+            [self sendPluginResult:pluginResult callbackId:SYNCALLRATEDATA];
+            [self sendPluginResult:pluginResult callbackId:SYNCALLSLEEPDATA];
+            [self sendPluginResult:pluginResult callbackId:SYNCSLEEPDATA];
+            [self sendPluginResult:pluginResult callbackId:SYNCALLDATA];
             //相应处理
             break;
         }
         case UTEDevicesSateCheckFirmwareError: {
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.domain];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:GETSERVERBTIMGVERSION]];
+            [self sendPluginResult:pluginResult callbackId:GETSERVERBTIMGVERSION];
             //相应处理
             break;
         }
@@ -663,19 +702,19 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
             }
             //相应处理 todo 不知道如何去取版本号
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@""];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:GETSERVERBTIMGVERSION]];
+            [self sendPluginResult:pluginResult callbackId:GETSERVERBTIMGVERSION];
             break;
         }
         case UTEDevicesSateUpdateNoNewVersion: {
             //相应处理
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"no new version"];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:GETSERVERBTIMGVERSION]];
+            [self sendPluginResult:pluginResult callbackId:GETSERVERBTIMGVERSION];
             break;
         }
         case UTEDevicesSateUpdateBegin: {
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"{state:'begin'}"];
             [pluginResult setKeepCallbackAsBool:true];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:UPDATEFIRMWARE]];
+            [self sendPluginResult:pluginResult callbackId:UPDATEFIRMWARE];
 
             //相应处理
             break;
@@ -683,15 +722,15 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
         case UTEDevicesSateUpdateSuccess: {
             //相应处理
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"{state:'success'}"];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:UPDATEFIRMWARE]];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:BEGINUPDATEFIRMWARE]];
+            [self sendPluginResult:pluginResult callbackId:UPDATEFIRMWARE];
+            [self sendPluginResult:pluginResult callbackId:BEGINUPDATEFIRMWARE];
             break;
         }
         case UTEDevicesSateUpdateError: {
             //相应处理
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.domain];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:UPDATEFIRMWARE]];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:BEGINUPDATEFIRMWARE]];
+            [self sendPluginResult:pluginResult callbackId:UPDATEFIRMWARE];
+            [self sendPluginResult:pluginResult callbackId:BEGINUPDATEFIRMWARE];
             break;
         }
         case UTEDevicesSateHeartDetectingProcess: {
@@ -815,10 +854,10 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
 - (void)uteManagerSyncProcess:(NSInteger)process {
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[NSString stringWithFormat:@"{process:%d}", process]];
     [pluginResult setKeepCallbackAsBool:true];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLRATEDATA]];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLSLEEPDATA]];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCSLEEPDATA]];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLDATA]];
+    [self sendPluginResult:pluginResult callbackId:SYNCALLRATEDATA];
+    [self sendPluginResult:pluginResult callbackId:SYNCALLSLEEPDATA];
+    [self sendPluginResult:pluginResult callbackId:SYNCSLEEPDATA];
+    [self sendPluginResult:pluginResult callbackId:SYNCALLDATA];
 }
 
 /**
@@ -829,8 +868,8 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
 - (void)uteManagerUpdateProcess:(NSInteger)process {
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[NSString stringWithFormat:@"{process:%d}", process]];
     [pluginResult setKeepCallbackAsBool:true];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:UPDATEFIRMWARE]];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:BEGINUPDATEFIRMWARE]];
+    [self sendPluginResult:pluginResult callbackId:UPDATEFIRMWARE];
+    [self sendPluginResult:pluginResult callbackId:BEGINUPDATEFIRMWARE];
 }
 
 /**
@@ -840,7 +879,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
 - (void)uteManagerTakePicture {
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [pluginResult setKeepCallbackAsBool:true];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SHAKEMODE]];
+    [self sendPluginResult:pluginResult callbackId:SHAKEMODE];
 }
 
 /**
@@ -855,57 +894,40 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
             break;
         case UTECallBackInfoHeightWeight: {
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:callback];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SENDSTEPLENANDWEIGHTTOBLE]];
+            [self sendPluginResult:pluginResult callbackId:SENDSTEPLENANDWEIGHTTOBLE];
         }
             break;
         case UTECallBackSyncTime: {//同步时间
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:callback];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCBLETIME]];
+            [self sendPluginResult:pluginResult callbackId:SYNCBLETIME];
         }
             break;
         case UTECallBackAlarm: {//设置闹铃的callback
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:callback];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SENDTOSETALARMCOMMAND]];
+            [self sendPluginResult:pluginResult callbackId:SENDTOSETALARMCOMMAND];
         }
             break;
-
-        case UTECallBackOpenRemindIncall: {
-        }
+        case UTECallBackOpenRemindIncall:
+        case UTECallBackOpenRemindQQ:
+        case UTECallBackOpenRemindWeixin:
+        case UTECallBackOpenRemindSms:
+        case UTECallBackOpenRemindMore:
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
+            [self sendPluginResult:pluginResult callbackId:OPENREMIND];
             break;
-        case UTECallBackOpenRemindQQ: {
-        }
+        case UTECallBackCloseRemindIncall:
+        case UTECallBackCloseRemindQQ:
+        case UTECallBackCloseRemindWeixin:
+        case UTECallBackCloseRemindSms:
+        case UTECallBackCloseRemindMore:
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:NO];
+            [self sendPluginResult:pluginResult callbackId:OPENREMIND];
             break;
-        case UTECallBackOpenRemindWeixin: {
-        }
-            break;
-        case UTECallBackOpenRemindSms: {
-        }
-            break;
-        case UTECallBackOpenRemindMore: {
-        }
-            break;
-
-        case UTECallBackCloseRemindIncall: {
-        }
-            break;
-        case UTECallBackCloseRemindQQ: {
-        }
-            break;
-        case UTECallBackCloseRemindWeixin: {
-        }
-            break;
-        case UTECallBackCloseRemindSms: {
-        }
-            break;
-        case UTECallBackCloseRemindMore: {
-        }
-            break;
-
             //久坐提醒开关
         case UTECallBackOpenUnitSitRemind:
         case UTECallBackCloseSitRemind: {
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:callback];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SENDSEDENTARYREMINDCOMMAND]];
+            [self sendPluginResult:pluginResult callbackId:SENDSEDENTARYREMINDCOMMAND];
         }
             break;
 
@@ -936,7 +958,7 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
             break;
         case UTECallBackDeviceBattery: {//读取电量
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:callback];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SENDTOREADBLEBATTERY]];
+            [self sendPluginResult:pluginResult callbackId:SENDTOREADBLEBATTERY];
         }
             break;
         case UTECallBackSwitchHandAndDisplay: {
@@ -979,10 +1001,10 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
     }
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:info];
     [pluginResult setKeepCallbackAsBool:true];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLRATEDATA]];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLSLEEPDATA]];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCSLEEPDATA]];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:SYNCALLDATA]];
+    [self sendPluginResult:pluginResult callbackId:SYNCALLRATEDATA];
+    [self sendPluginResult:pluginResult callbackId:SYNCALLSLEEPDATA];
+    [self sendPluginResult:pluginResult callbackId:SYNCSLEEPDATA];
+    [self sendPluginResult:pluginResult callbackId:SYNCALLDATA];
 }
 
 /**
@@ -1032,4 +1054,11 @@ NSString *UPDATEFIRMWARE = @"updateFirmware";
     return nil;
 }
 
+- (void)sendPluginResult:(CDVPluginResult *)pluginResult callbackId:(NSString *)callbackId {
+    if ([self getCallBackId:callbackId] != nil) {
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:[self getCallBackId:callbackId]];
+    } else {
+        NSLog(@"====sendPluginResult=== null method");
+    }
+}
 @end
