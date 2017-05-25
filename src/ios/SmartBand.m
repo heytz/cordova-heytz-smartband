@@ -242,7 +242,7 @@ NSString *OPENREMIND = @"openRemind";
 - (void)sendSedentaryRemindCommand:(CDVInvokedUrlCommand *)command {
     [self setCallBackId:SENDSEDENTARYREMINDCOMMAND callbackId:command.callbackId];
     Boolean state = (Boolean) command.arguments[0];
-    NSInteger remindTime = [command.arguments[1] integerValue];
+    float remindTime = [command.arguments[1] floatValue];
     if (state) {
 //        remindTime: 久坐多长时间就设备震动提醒(震动 2 秒,静止 2 秒 反复 3 次)
         [self.smartBandMgr setUTESitRemindOpenTime:remindTime];
@@ -338,11 +338,11 @@ NSString *OPENREMIND = @"openRemind";
 - (void)sendStepLenAndWeightToBLE:(CDVInvokedUrlCommand *)command {
     [self setCallBackId:SHAKEMODE callbackId:command.callbackId];
     float heigh = [[command.arguments objectAtIndex:0] floatValue];
-    NSInteger weight = [command.arguments objectAtIndex:1];
-    NSInteger light = [command.arguments objectAtIndex:2];
-    NSInteger sportTarget = [command.arguments objectAtIndex:3];
+    float weight = [[command.arguments objectAtIndex:1] floatValue];
+    float light = [[command.arguments objectAtIndex:2] floatValue];
+    float sportTarget = [[command.arguments objectAtIndex:3] floatValue];
     Boolean handLight = (Boolean) command.arguments[4];
-    NSInteger maxHeart = command.arguments[5];
+    float maxHeart = [command.arguments[5] floatValue];
 //    *  @param heigh  身高 UTEOptionUnitMeter 单位cm  范围格式 <91,240>
 //    *                身高 UTEOptionUnitInch 单位inch 范围格式 <3.00,7.11> 3尺00寸 ~ 7尺11寸 (小数点为11进制)
 //
@@ -428,8 +428,8 @@ NSString *OPENREMIND = @"openRemind";
 - (void)sendToReadBLEBattery:(CDVInvokedUrlCommand *)command {
     [self setCallBackId:SENDTOREADBLEBATTERY callbackId:command.callbackId];
     [self.smartBandMgr setUTEOption:UTEOptionReadDevicesBattery];
-    int battery = [[self.smartBandMgr connectedDevicesModel] battery];
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:battery];
+    long battery = [[self.smartBandMgr connectedDevicesModel] battery];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(int)battery];
     [self sendPluginResult:pluginResult callbackId:SENDTOREADBLEBATTERY];
 }
 
@@ -853,7 +853,7 @@ NSString *OPENREMIND = @"openRemind";
  *  @param process 进度(0到100)
  */
 - (void)uteManagerSyncProcess:(NSInteger)process {
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[NSString stringWithFormat:@"{process:%d}", process]];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[NSString stringWithFormat:@"{process:%ld}", process]];
     [pluginResult setKeepCallbackAsBool:true];
     [self sendPluginResult:pluginResult callbackId:SYNCALLRATEDATA];
     [self sendPluginResult:pluginResult callbackId:SYNCALLSLEEPDATA];
@@ -867,7 +867,7 @@ NSString *OPENREMIND = @"openRemind";
  *  @param process 进度(0到100)
  */
 - (void)uteManagerUpdateProcess:(NSInteger)process {
-    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[NSString stringWithFormat:@"{process:%d}", process]];
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[NSString stringWithFormat:@"{process:%ld}", process]];
     [pluginResult setKeepCallbackAsBool:true];
     [self sendPluginResult:pluginResult callbackId:UPDATEFIRMWARE];
     [self sendPluginResult:pluginResult callbackId:BEGINUPDATEFIRMWARE];

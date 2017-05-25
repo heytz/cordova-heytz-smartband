@@ -74,7 +74,7 @@
 
 - (void)beginUpdateFirmware:(CDVInvokedUrlCommand *)command;
 
-- (void)changeDeviveFeature:(CDVInvokedUrlCommand *)command;
+//- (void)changeDeviveFeature:(CDVInvokedUrlCommand *)command;
 
 - (void)updateFirmware:(CDVInvokedUrlCommand *)command;
 
