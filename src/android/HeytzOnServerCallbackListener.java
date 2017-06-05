@@ -9,10 +9,10 @@ import com.yc.pedometer.utils.GlobalVariable;
  */
 public class HeytzOnServerCallbackListener implements OnServerCallbackListener {
     private final String TAG = "==========HeytzOnServerCallbackListener===========\n";
-    private HeytzSmartApp heytzSmartApp;
+    private HeytzSmartApp app;
 
     HeytzOnServerCallbackListener(HeytzSmartApp app) {
-        this.heytzSmartApp = app;
+        this.app = app;
     }
 
     @Override
@@ -25,10 +25,10 @@ public class HeytzOnServerCallbackListener implements OnServerCallbackListener {
                 break;
         }
         final String js = "cordova.plugins.SmartBand.openOnServerCallback(" + status + ");";
-        heytzSmartApp.getActivity().runOnUiThread(new Runnable() {
+        app.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                heytzSmartApp.getSmartBand().webView.loadUrl("javascript:" + js);
+                app.getSmartBand().webView.loadUrl("javascript:" + js);
             }
         });
     }

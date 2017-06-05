@@ -9,10 +9,10 @@ import com.yc.pedometer.sdk.ServiceStatusCallback;
  */
 public class HeytzServiceStatusCallback implements ServiceStatusCallback {
     private final String TAG = "==========HeytzServiceStatusCallback===========\n";
-    private HeytzSmartApp heytzSmartApp;
+    private HeytzSmartApp app;
 
     HeytzServiceStatusCallback(HeytzSmartApp app) {
-        this.heytzSmartApp = app;
+        this.app = app;
     }
 
     //    如果没在搜索界面提前实例BLEServiceOperate的话，下面这4行需要放到OnServiceStatuslt
@@ -26,10 +26,10 @@ public class HeytzServiceStatusCallback implements ServiceStatusCallback {
 //            }
         }
         final String js = "cordova.plugins.SmartBand.openOnServiceStatuslt(" + status + ");";
-        heytzSmartApp.getActivity().runOnUiThread(new Runnable() {
+        app.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                heytzSmartApp.getSmartBand().webView.loadUrl("javascript:" + js);
+                app.getSmartBand().webView.loadUrl("javascript:" + js);
             }
         });
     }

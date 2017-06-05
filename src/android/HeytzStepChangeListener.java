@@ -10,10 +10,10 @@ import org.json.JSONObject;
  */
 public class HeytzStepChangeListener implements StepChangeListener {
     private final String TAG = "==========HeytzStepChangeListener===========\n";
-    private HeytzSmartApp heytzSmartApp;
+    private HeytzSmartApp app;
 
     HeytzStepChangeListener(HeytzSmartApp app) {
-        this.heytzSmartApp = app;
+        this.app = app;
     }
     @Override
     public void onStepChange(int steps, float distance, int calories) {
@@ -29,10 +29,10 @@ public class HeytzStepChangeListener implements StepChangeListener {
         }
         String format = "cordova.plugins.SmartBand.openOnStepChange(%s);";
         final String js = String.format(format, data.toString());
-        heytzSmartApp.getActivity().runOnUiThread(new Runnable() {
+        app.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                heytzSmartApp.getSmartBand().webView.loadUrl("javascript:" + js);
+                app.getSmartBand().webView.loadUrl("javascript:" + js);
             }
         });
 

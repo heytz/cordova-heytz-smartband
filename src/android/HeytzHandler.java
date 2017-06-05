@@ -12,10 +12,10 @@ import org.apache.cordova.PluginResult;
  */
 public class HeytzHandler extends Handler {
     private final String TAG = "==========HeytzHandler===========\n";
-    private HeytzSmartApp heytzSmartApp;
+    private HeytzSmartApp app;
 
     HeytzHandler(HeytzSmartApp app) {
-        this.heytzSmartApp = app;
+        this.app = app;
     }
 
     @Override
@@ -24,9 +24,9 @@ public class HeytzHandler extends Handler {
         switch (msg.what) {
             case GlobalVariable.GET_RSSI_MSG:
                 Bundle bundle = msg.getData();
-                if (heytzSmartApp.getCallbackContext(Operation.READRSSI.getMethod()) != null) {
+                if (app.getCallbackContext(Operation.READRSSI.getMethod()) != null) {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, bundle.getInt(GlobalVariable.EXTRA_RSSI));
-                    heytzSmartApp.getCallbackContext(Operation.READRSSI.getMethod()).sendPluginResult(pluginResult);
+                    app.getCallbackContext(Operation.READRSSI.getMethod()).sendPluginResult(pluginResult);
                 }
                 break;
             case GlobalVariable.START_PROGRESS_MSG:

@@ -12,10 +12,10 @@ import org.json.JSONObject;
  * 设备扫描回调接口
  */
 public class HeytzDeviceScanInterfacer implements DeviceScanInterfacer {
-    private HeytzSmartApp heytzSmartApp;
+    private HeytzSmartApp app;
 
     public HeytzDeviceScanInterfacer(HeytzSmartApp hApp) {
-        this.heytzSmartApp = hApp;
+        this.app = hApp;
     }
 
     /**
@@ -27,11 +27,11 @@ public class HeytzDeviceScanInterfacer implements DeviceScanInterfacer {
      */
     @Override
     public void LeScanCallback(BluetoothDevice bluetoothDevice, int rssi) {
-        heytzSmartApp.addLeDevice(bluetoothDevice);
-        if (heytzSmartApp.getCallbackContext(Operation.SCAN.getMethod()) != null) {
+        app.addLeDevice(bluetoothDevice);
+        if (app.getCallbackContext(Operation.SCAN.getMethod()) != null) {
             JSONArray jsonArray = new JSONArray();
-            for (int i = 0; i < heytzSmartApp.getLeDeviceList().size(); i++) {
-                JSONObject device = HeytzUtil.deviceToJSONObject(heytzSmartApp.getLeDeviceList().get(i));
+            for (int i = 0; i < app.getLeDeviceList().size(); i++) {
+                JSONObject device = HeytzUtil.deviceToJSONObject(app.getLeDeviceList().get(i));
                 try {
                     device.put("rssi", rssi);
                 } catch (JSONException e) {
@@ -41,7 +41,7 @@ public class HeytzDeviceScanInterfacer implements DeviceScanInterfacer {
             }
             PluginResult result = new PluginResult(PluginResult.Status.OK, jsonArray);
             result.setKeepCallback(true);
-            heytzSmartApp.getCallbackContext(Operation.SCAN.getMethod()).sendPluginResult(result);
+            app.getCallbackContext(Operation.SCAN.getMethod()).sendPluginResult(result);
         }
     }
 }

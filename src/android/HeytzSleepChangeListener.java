@@ -7,20 +7,20 @@ import com.yc.pedometer.sdk.SleepChangeListener;
  */
 public class HeytzSleepChangeListener implements SleepChangeListener {
     private final String TAG = "==========HeytzSleepChangeListener===========\n";
-    private HeytzSmartApp heytzSmartApp;
+    private HeytzSmartApp app;
 
     HeytzSleepChangeListener(HeytzSmartApp app) {
-        this.heytzSmartApp = app;
+        this.app = app;
     }
 
     @Override
     public void onSleepChange() {
         //睡眠数据发现改变可以去查询当天的睡眠数据querySleepInfo
         final String js = "cordova.plugins.SmartBand.openOnSleepChange();";
-        heytzSmartApp.getActivity().runOnUiThread(new Runnable() {
+        app.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                heytzSmartApp.getSmartBand().webView.loadUrl("javascript:" + js);
+                app.getSmartBand().webView.loadUrl("javascript:" + js);
             }
         });
     }

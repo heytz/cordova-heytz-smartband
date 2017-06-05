@@ -72,6 +72,7 @@ public enum Operation {
     //判断平台
     ISRKPLATFORM("isRKPlatform"),
     GETSERVERBTIMGVERSION("getServerBtImgVersion"),
+    PermissionCallback("permissionCallback"),
     GETSERVERPATCHVERSION("getServerPatchVersion");
 
     private String method;

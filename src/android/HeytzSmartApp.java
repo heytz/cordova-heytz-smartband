@@ -18,10 +18,12 @@ public class HeytzSmartApp {
     private ArrayList<BluetoothDevice> leDeviceList;
     private final long SCAN_PERIOD = 10000;
     private Map<String, CallbackContext> callbackContextMap;
+    private Boolean enable;
+    private int scanSeconds;
 
     HeytzSmartApp(SmartBand sb) {
         super();
-        this.smartBand=sb;
+        this.smartBand = sb;
         leDeviceList = new ArrayList<BluetoothDevice>();
         callbackContextMap = new HashMap<String, CallbackContext>();
     }
@@ -101,5 +103,21 @@ public class HeytzSmartApp {
 
     public long getScanPeriod() {
         return SCAN_PERIOD;
+    }
+
+    public void setEnable(boolean s) {
+        this.enable = s;
+    }
+
+    public boolean getEnable() {
+        return this.enable;
+    }
+
+    public void setScanSeconds(int s) {
+        this.scanSeconds = s;
+    }
+
+    public int getScanSeconds() {
+        return this.scanSeconds;
     }
 }

@@ -12,10 +12,10 @@ import org.json.JSONObject;
  */
 public class HeytzICallback implements ICallback {
     private final String TAG = "======HeytzICallback======\n";
-    private HeytzSmartApp heytzSmartApp;
+    private HeytzSmartApp app;
 
     public HeytzICallback(HeytzSmartApp app) {
-        this.heytzSmartApp = app;
+        this.app = app;
     }
 
     /**
@@ -31,34 +31,34 @@ public class HeytzICallback implements ICallback {
             case ICallbackStatus.OFFLINE_STEP_SYNCING:
                 Log.d(TAG, "步数同步中");
                 // step snyc complete
-                if (heytzSmartApp.getCallbackContext(Operation.SYNALLSTEPDATA.getMethod()) != null) {
+                if (app.getCallbackContext(Operation.SYNALLSTEPDATA.getMethod()) != null) {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, "syncing");
                     pluginResult.setKeepCallback(true);
-                    heytzSmartApp.getCallbackContext(Operation.SYNALLSTEPDATA.getMethod()).sendPluginResult(pluginResult);
+                    app.getCallbackContext(Operation.SYNALLSTEPDATA.getMethod()).sendPluginResult(pluginResult);
                 }
                 break;
             case ICallbackStatus.OFFLINE_STEP_SYNC_OK:
                 Log.d(TAG, "步数同步完成");
                 // step snyc complete
-                if (heytzSmartApp.getCallbackContext(Operation.SYNALLSTEPDATA.getMethod()) != null) {
+                if (app.getCallbackContext(Operation.SYNALLSTEPDATA.getMethod()) != null) {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, "ok");
-                    heytzSmartApp.getCallbackContext(Operation.SYNALLSTEPDATA.getMethod()).sendPluginResult(pluginResult);
+                    app.getCallbackContext(Operation.SYNALLSTEPDATA.getMethod()).sendPluginResult(pluginResult);
                 }
                 break;
             case ICallbackStatus.OFFLINE_SLEEP_SYNCING:
                 Log.d(TAG, "睡眠同步中");
-                if (heytzSmartApp.getCallbackContext(Operation.SYNCALLSLEEPDATA.getMethod()) != null) {
+                if (app.getCallbackContext(Operation.SYNCALLSLEEPDATA.getMethod()) != null) {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, "syncing");
                     pluginResult.setKeepCallback(true);
-                    heytzSmartApp.getCallbackContext(Operation.SYNCALLSLEEPDATA.getMethod()).sendPluginResult(pluginResult);
+                    app.getCallbackContext(Operation.SYNCALLSLEEPDATA.getMethod()).sendPluginResult(pluginResult);
                 }
                 break;
             case ICallbackStatus.OFFLINE_SLEEP_SYNC_OK:
                 // sleep snyc complete
                 Log.d(TAG, "睡眠同步完成");
-                if (heytzSmartApp.getCallbackContext(Operation.SYNCALLSLEEPDATA.getMethod()) != null) {
+                if (app.getCallbackContext(Operation.SYNCALLSLEEPDATA.getMethod()) != null) {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, "ok");
-                    heytzSmartApp.getCallbackContext(Operation.SYNCALLSLEEPDATA.getMethod()).sendPluginResult(pluginResult);
+                    app.getCallbackContext(Operation.SYNCALLSLEEPDATA.getMethod()).sendPluginResult(pluginResult);
                 }
                 break;
             case ICallbackStatus.SYNC_TIME_OK: // after set time
@@ -67,9 +67,9 @@ public class HeytzICallback implements ICallback {
                 // to read
                 // localBleVersion
                 // mWriteCommand.sendToReadBLEVersion();
-                if (heytzSmartApp.getCallbackContext(Operation.SYNCBLETIME.getMethod()) != null) {
+                if (app.getCallbackContext(Operation.SYNCBLETIME.getMethod()) != null) {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
-                    heytzSmartApp.getCallbackContext(Operation.SYNCBLETIME.getMethod()).sendPluginResult(pluginResult);
+                    app.getCallbackContext(Operation.SYNCBLETIME.getMethod()).sendPluginResult(pluginResult);
                 }
                 break;
             case ICallbackStatus.GET_BLE_VERSION_OK: // after read
@@ -80,13 +80,13 @@ public class HeytzICallback implements ICallback {
                 // mWriteCommand.syncAllStepData();
                 break;
             case ICallbackStatus.DISCONNECT_STATUS://未连接/连接失败/断开连接
-                if (heytzSmartApp.getCallbackContext(Operation.DISCONNECT.getMethod()) != null) {
+                if (app.getCallbackContext(Operation.DISCONNECT.getMethod()) != null) {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
-                    heytzSmartApp.getCallbackContext(Operation.DISCONNECT.getMethod()).sendPluginResult(pluginResult);
+                    app.getCallbackContext(Operation.DISCONNECT.getMethod()).sendPluginResult(pluginResult);
                 }
-                if (heytzSmartApp.getCallbackContext(Operation.CONNECT.getMethod()) != null) {
+                if (app.getCallbackContext(Operation.CONNECT.getMethod()) != null) {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, result);
-                    heytzSmartApp.getCallbackContext(Operation.CONNECT.getMethod()).sendPluginResult(pluginResult);
+                    app.getCallbackContext(Operation.CONNECT.getMethod()).sendPluginResult(pluginResult);
                 }
                 break;
             case ICallbackStatus.CONNECTED_STATUS:
@@ -94,10 +94,10 @@ public class HeytzICallback implements ICallback {
                 break;
             case ICallbackStatus.DISCOVERY_DEVICE_SHAKE://摇一摇
                 // Discovery device Shake
-                if (heytzSmartApp.getCallbackContext(Operation.SHAKEMODE.getMethod()) != null) {
+                if (app.getCallbackContext(Operation.SHAKEMODE.getMethod()) != null) {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
                     pluginResult.setKeepCallback(true);
-                    heytzSmartApp.getCallbackContext(Operation.SHAKEMODE.getMethod()).sendPluginResult(pluginResult);
+                    app.getCallbackContext(Operation.SHAKEMODE.getMethod()).sendPluginResult(pluginResult);
                 }
                 break;
             case ICallbackStatus.OFFLINE_RATE_SYNC_OK:
@@ -109,10 +109,10 @@ public class HeytzICallback implements ICallback {
             case ICallbackStatus.SET_FIRST_ALARM_CLOCK_OK: // 设置第1个闹钟OK
             case ICallbackStatus.SET_SECOND_ALARM_CLOCK_OK: // 设置第2个闹钟OK
             case ICallbackStatus.SET_THIRD_ALARM_CLOCK_OK: // 设置第3个闹钟OK
-                if (heytzSmartApp.getCallbackContext(Operation.SENDTOSETALARMCOMMAND.getMethod()) != null) {
+                if (app.getCallbackContext(Operation.SENDTOSETALARMCOMMAND.getMethod()) != null) {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, status);
                     pluginResult.setKeepCallback(true);
-                    heytzSmartApp.getCallbackContext(Operation.SENDTOSETALARMCOMMAND.getMethod()).sendPluginResult(pluginResult);
+                    app.getCallbackContext(Operation.SENDTOSETALARMCOMMAND.getMethod()).sendPluginResult(pluginResult);
                 }
                 break;
             case ICallbackStatus.SEND_PHONE_NAME_NUMBER_OK: //
@@ -148,19 +148,19 @@ public class HeytzICallback implements ICallback {
             case ICallbackStatus.SEDENTARY_REMIND_OPEN:
             case ICallbackStatus.SEDENTARY_REMIND_CLOSE:
                 Log.d(TAG, "久坐提醒");
-                if (heytzSmartApp.getCallbackContext(Operation.SENDSEDENTARYREMINDCOMMAND.getMethod()) != null) {
+                if (app.getCallbackContext(Operation.SENDSEDENTARYREMINDCOMMAND.getMethod()) != null) {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, status);
-                    heytzSmartApp.getCallbackContext(Operation.SENDSEDENTARYREMINDCOMMAND.getMethod()).sendPluginResult(pluginResult);
+                    app.getCallbackContext(Operation.SENDSEDENTARYREMINDCOMMAND.getMethod()).sendPluginResult(pluginResult);
                 }
                 break;
             case ICallbackStatus.SET_STEPLEN_WEIGHT_OK:
-                if (heytzSmartApp.getCallbackContext(Operation.SENDSTEPLENANDWEIGHTTOBLE.getMethod()) != null) {
+                if (app.getCallbackContext(Operation.SENDSTEPLENANDWEIGHTTOBLE.getMethod()) != null) {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, status);
-                    heytzSmartApp.getCallbackContext(Operation.SENDSTEPLENANDWEIGHTTOBLE.getMethod()).sendPluginResult(pluginResult);
+                    app.getCallbackContext(Operation.SENDSTEPLENANDWEIGHTTOBLE.getMethod()).sendPluginResult(pluginResult);
                 }
                 break;
         }
-        if (this.heytzSmartApp.getSmartBand() == null) {
+        if (this.app.getSmartBand() == null) {
             return;
         }
         JSONObject data = new JSONObject();
@@ -172,10 +172,10 @@ public class HeytzICallback implements ICallback {
         }
         String format = "cordova.plugins.SmartBand.openHeytzICallback(%s);";
         final String js = String.format(format, data.toString());
-        heytzSmartApp.getActivity().runOnUiThread(new Runnable() {
+        app.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                heytzSmartApp.getSmartBand().webView.loadUrl("javascript:" + js);
+                app.getSmartBand().webView.loadUrl("javascript:" + js);
             }
         });
     }

@@ -1,9 +1,13 @@
 package com.heytz.smartband;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.graphics.Path;
 import android.util.Log;
 import com.yc.pedometer.info.SleepTimeInfo;
 import com.yc.pedometer.info.StepInfo;
@@ -15,6 +19,9 @@ import org.apache.cordova.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,25 +47,30 @@ public class SmartBand extends CordovaPlugin {
     private HeytzSleepChangeListener heytzSleepChangeListener;
     private Updates mUpdates;
     private DataProcessing mDataProcessing;
-    private HeytzSmartApp heytzSmartApp;
+    private HeytzSmartApp app;
+
+    // Android 23 requires new permissions for mBLEServiceOperate.startScan()
+    private static final String ACCESS_COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private static final int REQUEST_ACCESS_COARSE_LOCATION = 2;
+    private static final int PERMISSION_DENIED_ERROR = 20;
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
         Context context = cordova.getActivity().getApplicationContext();
         mBLEServiceOperate = BLEServiceOperate.getInstance(context);// 用于BluetoothLeService实例化准备,必须
-        heytzSmartApp = new HeytzSmartApp(this);
-        heytzSmartApp.setActivity(cordova.getActivity());
+        app = new HeytzSmartApp(this);
+        app.setActivity(cordova.getActivity());
 
-        heytzHandler = new HeytzHandler(heytzSmartApp);
-        heytzDeviceScanInterfacer = new HeytzDeviceScanInterfacer(heytzSmartApp);
-        heytziCallback = new HeytzICallback(heytzSmartApp);
-        heytzServiceStatusCallback = new HeytzServiceStatusCallback(heytzSmartApp);
-        heytzOnServerCallbackListener = new HeytzOnServerCallbackListener(heytzSmartApp);
-        heytzOnBleServiceUpdateListener = new HeytzOnBleServiceUpdateListener(heytzSmartApp);
-        heytzBroadcastReceiver = new HeytzBroadcastReceiver(heytzSmartApp);
-        heytzStepChangeListener = new HeytzStepChangeListener(heytzSmartApp);
-        heytzSleepChangeListener = new HeytzSleepChangeListener(heytzSmartApp);
+        heytzHandler = new HeytzHandler(app);
+        heytzDeviceScanInterfacer = new HeytzDeviceScanInterfacer(app);
+        heytziCallback = new HeytzICallback(app);
+        heytzServiceStatusCallback = new HeytzServiceStatusCallback(app);
+        heytzOnServerCallbackListener = new HeytzOnServerCallbackListener(app);
+        heytzOnBleServiceUpdateListener = new HeytzOnBleServiceUpdateListener(app);
+        heytzBroadcastReceiver = new HeytzBroadcastReceiver(app);
+        heytzStepChangeListener = new HeytzStepChangeListener(app);
+        heytzSleepChangeListener = new HeytzSleepChangeListener(app);
         // Checks if Bluetooth is supported on the device.
         if (!mBLEServiceOperate.isSupportBle4_0()) {
             return;
@@ -100,58 +112,50 @@ public class SmartBand extends CordovaPlugin {
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        heytzSmartApp.setCallbackContext(action, callbackContext);
+        app.setCallbackContext(action, callbackContext);
         if (action.equals(Operation.INIT.getMethod())) {
             callbackContext.success();
             return true;
-        }
-        if (action.equals(Operation.SCAN.getMethod())) {
-            heytzSmartApp.clearLeDeviceList();
-            scanDevice(true, 0);
+        } else if (action.equals(Operation.SCAN.getMethod())) {
+            app.clearLeDeviceList();
+            scanDevice(callbackContext, true, 0);
             scanCallback = callbackContext;
             return true;
-        }
-        if (action.equals(Operation.STOPSCAN.getMethod())) {
-            this.scanDevice(false, 0);
+        } else if (action.equals(Operation.STOPSCAN.getMethod())) {
+            this.scanDevice(callbackContext, false, 0);
             callbackContext.success();
             return true;
-        }
-        if (action.equals(Operation.ISSUPPORTED.getMethod())) {
+        } else if (action.equals(Operation.ISSUPPORTED.getMethod())) {
             if (mBLEServiceOperate.isSupportBle4_0()) {
                 callbackContext.success();
             } else {
                 callbackContext.error("nonsupport");
             }
             return true;
-        }
-        if (action.equals(Operation.CONNECT.getMethod())) {
-            boolean isExist = false;
+        } else if (action.equals(Operation.CONNECT.getMethod())) {
             String address = args.getString(0);
-            for (int i = 0; i < heytzSmartApp.getLeDeviceList().size(); i++) {
-                if (heytzSmartApp.getLeDeviceList().get(i).getAddress().equals(address)) {
-                    isExist = true;
-                    if (mBLEServiceOperate.connect(heytzSmartApp.getLeDeviceList().get(i).getAddress())) {
+            ArrayList<BluetoothDevice> devices = app.getLeDeviceList();
+            for (BluetoothDevice device : devices) {
+                String currentDeviceAddress = device.getAddress();
+                if (currentDeviceAddress.equals(address)) {
+                    if (mBLEServiceOperate.connect(currentDeviceAddress)) {
                         callbackContext.success();
                     } else {
                         callbackContext.error("connect error!");
                     }
+                    return true;
                 }
             }
-            if (!isExist) {
-                callbackContext.error("device don't exist");
-            }
+            callbackContext.error("device don't exist");
             return true;
-        }
-        if (action.equals(Operation.DISCONNECT.getMethod())) {
+        } else if (action.equals(Operation.DISCONNECT.getMethod())) {
             mBLEServiceOperate.disConnect();
             return true;
-        }
-        if (action.equals(Operation.UNBINDSERVICE.getMethod())) {
+        } else if (action.equals(Operation.UNBINDSERVICE.getMethod())) {
             mBLEServiceOperate.unBindService();
             callbackContext.success();
             return true;
-        }
-        if (action.equals(Operation.ISENABLED.getMethod())) {
+        } else if (action.equals(Operation.ISENABLED.getMethod())) {
             if (mBLEServiceOperate.isBleEnabled()) {
                 callbackContext.success();
             } else {
@@ -161,47 +165,22 @@ public class SmartBand extends CordovaPlugin {
                 callbackContext.error("Bluetooth is disabled.");
             }
             return true;
-        }
-//        if (action.equals(Operation.WRITE.getMethod())) {
-//            int type = args.getInt(0);
-//            boolean value = args.getBoolean(1);
-//            switch (type) {
-//                case 0:
-//                    mWriteCommand.sendToSetAlarmCommand(1, GlobalVariable.EVERYDAY,
-//                            16, 25, value, 5);// 新增最后一个参数，振动次数//2.2.1版本修改
-//                    break;
-//                case 1:
-//                    mWriteCommand.syncBLETime();
-//                    break;
-//
-//            }
-//            return true;
-//        }
-        //同步时间
-        if (action.equals(Operation.SYNCBLETIME.getMethod())) {
+        } else if (action.equals(Operation.SYNCBLETIME.getMethod())) {//同步时间
             mWriteCommand.syncBLETime();
             callbackContext.success();
             return true;
-        }
-        //读取电量
-        if (action.equals(Operation.SENDTOREADBLEBATTERY.getMethod())) {
+        } else if (action.equals(Operation.SENDTOREADBLEBATTERY.getMethod())) {//读取电量
             mWriteCommand.sendToReadBLEBattery();
             return true;
-        }
-        //读取版本号
-        if (action.equals(Operation.SENDTOREADBLEVERSION.getMethod())) {
+        } else if (action.equals(Operation.SENDTOREADBLEVERSION.getMethod())) {//读取版本号
             mWriteCommand.sendToReadBLEVersion();
             return true;
-        }
-        //发送久坐 醒功能开启/关闭指令以及 醒周期
-        if (action.equals(Operation.SENDSEDENTARYREMINDCOMMAND.getMethod())) {
+        } else if (action.equals(Operation.SENDSEDENTARYREMINDCOMMAND.getMethod())) {//发送久坐 醒功能开启/关闭指令以及 醒周期
             int flag = args.getInt(0);
             int minutes = args.getInt(1);
             mWriteCommand.sendSedentaryRemindCommand(flag, minutes);
             return true;
-        }
-        //摇一摇
-        if (action.equals(Operation.SHAKEMODE.getMethod())) {
+        } else if (action.equals(Operation.SHAKEMODE.getMethod())) { //摇一摇
             Boolean state = args.getBoolean(0);
             if (state) {
                 mWriteCommand.openShakeMode();
@@ -210,9 +189,7 @@ public class SmartBand extends CordovaPlugin {
                 callbackContext.success();
             }
             return true;
-        }
-        //发送设置闹钟指令
-        if (action.equals(Operation.SENDTOSETALARMCOMMAND.getMethod())) {
+        } else if (action.equals(Operation.SENDTOSETALARMCOMMAND.getMethod())) { //发送设置闹钟指令
             int whichClock = args.getInt(0);
             String weekPeroidString = args.getString(1);
             int hour = args.getInt(2);
@@ -245,10 +222,9 @@ public class SmartBand extends CordovaPlugin {
             mWriteCommand.sendToSetAlarmCommand(whichClock, weekPeroid,
                     hour, minute, isOpen, shakePeriod);// 新增最后一个参数，振动次数//2.2.1版本修改
             return true;
-        }
-        //发身高体重和灭屏时间、目标步数、抬手亮屏
-        // 醒:修改身高体重后，需要同步一次计步数据，应用上的距离和卡 路里才会按照新修改的身高体重进行计算并更新。
-        if (action.equals(Operation.SENDSTEPLENANDWEIGHTTOBLE.getMethod())) {
+        } else if (action.equals(Operation.SENDSTEPLENANDWEIGHTTOBLE.getMethod())) {
+            //发身高体重和灭屏时间、目标步数、抬手亮屏
+            // 醒:修改身高体重后，需要同步一次计步数据，应用上的距离和卡 路里才会按照新修改的身高体重进行计算并更新。
             int height = args.getInt(0);//身高(cm)
             int weight = args.getInt(1);//体重(kg)
             int offScreenTime = args.getInt(2);//灭屏时间(秒)
@@ -258,103 +234,73 @@ public class SmartBand extends CordovaPlugin {
             int highestRate = args.getInt(6);//最后一个参数为最高心率 醒 的值。
             mWriteCommand.sendStepLenAndWeightToBLE(height, weight, offScreenTime, stepTask, isRraisHandbrightScreenSwitchOpen, isHighestRateOpen, highestRate);// 新增最后一个参数，振动次数//2.2.1版本修改
             return true;
-        }
-        //查找手环
-        if (action.equals(Operation.FINDBAND.getMethod())) {
+        } else if (action.equals(Operation.FINDBAND.getMethod())) { //查找手环
             int vibrationCount = args.getInt(0);
             mWriteCommand.findBand(vibrationCount);
             return true;
-        }
-        //清除设备所有数据，即设备恢复出厂设置
-        if (action.equals(Operation.DELETEDEVICEALLDATA.getMethod())) {
+        } else if (action.equals(Operation.DELETEDEVICEALLDATA.getMethod())) { //清除设备所有数据，即设备恢复出厂设置
             mWriteCommand.deleteDevicesAllData();
+            callbackContext.success();
             return true;
-        }
-        //同步计步数据(连上设备后，请同步一次步数(实际是在设置时间后，同步步 数);同步完成前，请不要进行其他任何的通信工作)
-        if (action.equals(Operation.SYNALLSTEPDATA.getMethod())) {
+        } else if (action.equals(Operation.SYNALLSTEPDATA.getMethod())) { //同步计步数据(连上设备后，请同步一次步数(实际是在设置时间后，同步步 数);同步完成前，请不要进行其他任何的通信工作)
             mWriteCommand.syncAllStepData();
             return true;
-        }
-        //新一天初始化计步数据库
-        if (action.equals(Operation.UPDATESTEPSQL.getMethod())) {
+        } else if (action.equals(Operation.UPDATESTEPSQL.getMethod())) { //新一天初始化计步数据库
             utesqlOperate.updateStepSQL();
             callbackContext.success();
             return true;
-        }
-        //查询一天的总步数
-        if (action.equals(Operation.QUERYSTEPDATE.getMethod())) {
+        } else if (action.equals(Operation.QUERYSTEPDATE.getMethod())) {//查询一天的总步数
             String queryDate = args.getString(0);
             int totalStep = utesqlOperate.queryStepDate(queryDate);
             callbackContext.success(totalStep);
             return true;
-        }
-        //查询一天的步数、距离、卡路里
-        if (action.equals(Operation.QUERYSTEPDINFO.getMethod())) {
+        } else if (action.equals(Operation.QUERYSTEPDINFO.getMethod())) {//查询一天的步数、距离、卡路里
             String queryDate = args.getString(0);
             StepInfo stepInfo = utesqlOperate.queryStepInfo(queryDate);
             callbackContext.success(HeytzUtil.stepInfoToJSONObject(stepInfo));
             return true;
-        }
-        //查询某一天各小时步数
-        if (action.equals(Operation.QUERYONEHOURSTEPSQL.getMethod())) {
+        } else if (action.equals(Operation.QUERYONEHOURSTEPSQL.getMethod())) { //查询某一天各小时步数
             String queryDate = args.getString(0);
             List<StepOneHourInfo> stepList = utesqlOperate.queryOneHourStepSQL(queryDate);
             JSONArray jsonArray = new JSONArray();
-            for (int i = 0; i < stepList.size(); i++) {
-                jsonArray.put(HeytzUtil.stepOneHourInfoToJSONObject(stepList.get(i)));
+            for (StepOneHourInfo aStepList : stepList) {
+                jsonArray.put(HeytzUtil.stepOneHourInfoToJSONObject(aStepList));
             }
             callbackContext.success(jsonArray);
             return true;
-        }
-        //同步睡眠数据(同步完成前，请不要进行其他任何的通信工作)
-        if (action.equals(Operation.SYNCALLSLEEPDATA.getMethod())) {
+        } else if (action.equals(Operation.SYNCALLSLEEPDATA.getMethod())) { //同步睡眠数据(同步完成前，请不要进行其他任何的通信工作)
             mWriteCommand.syncAllSleepData();
             return true;
-        }
-        //查询一天的睡眠总时间
-        if (action.equals(Operation.QUERYSLEEPDATE.getMethod())) {
+        } else if (action.equals(Operation.QUERYSLEEPDATE.getMethod())) { //查询一天的睡眠总时间
             String queryDate = args.getString(0);
             int miuntes = utesqlOperate.querySleepDate(queryDate);
             callbackContext.success(miuntes);
             return true;
-        }
-        //查询一天的睡眠详情
-        if (action.equals(Operation.QUERYSLEEPINFO.getMethod())) {
+        } else if (action.equals(Operation.QUERYSLEEPINFO.getMethod())) {//查询一天的睡眠详情
             String calendar = args.getString(0);
             SleepTimeInfo sleepTimeInfo = utesqlOperate.querySleepInfo(calendar);
             callbackContext.success(HeytzUtil.sleepTimeInfoToJSONObject(sleepTimeInfo));
             return true;
-        }
-        //查询设备升级属性 (升级前必须调用查询
-        if (action.equals(Operation.QUERYDEVICEFEARTURE.getMethod())) {
+        } else if (action.equals(Operation.QUERYDEVICEFEARTURE.getMethod())) { //查询设备升级属性 (升级前必须调用查询
             mWriteCommand.queryDeviceFearture();
             return true;
-        }
-        //查询设备升级属性 (升级前必须调用查询
-        if (action.equals(Operation.READRSSI.getMethod())) {
+        } else if (action.equals(Operation.READRSSI.getMethod())) { //查询设备升级属性 (升级前必须调用查询
             mBluetoothLeService.readRssi();
             return true;
-        }
-        //判断平台
-        if (action.equals(Operation.ISRKPLATFORM.getMethod())) {
+        } else if (action.equals(Operation.ISRKPLATFORM.getMethod())) { //判断平台
             boolean b = mUpdates.isRKPlatform();
             PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, b);
             callbackContext.sendPluginResult(pluginResult);
             return true;
-        }
-        //获取新版本的版本号
-        if (action.equals(Operation.GETSERVERBTIMGVERSION.getMethod())) {
+        } else if (action.equals(Operation.GETSERVERBTIMGVERSION.getMethod())) { //获取新版本的版本号
             String version = mUpdates.getServerBtImgVersion();
             callbackContext.success(version);
             return true;
-        }
-        //获取新版本的版本号。 示:RK 平台才有 patch 版本号。
-        if (action.equals(Operation.GETSERVERPATCHVERSION.getMethod())) {
+        } else if (action.equals(Operation.GETSERVERPATCHVERSION.getMethod())) {//获取新版本的版本号。 示:RK 平台才有 patch 版本号。
             String version = mUpdates.getServerPatchVersion();
             callbackContext.success(version);
             return true;
-        }
-        if (action.equals(Operation.GETSERVERPATCHVERSION.getMethod())) {
+        } else if (action.equals(Operation.GETSERVERPATCHVERSION.getMethod())) {
             mWriteCommand.sendOffHookCommand();
             return true;
         }
@@ -366,7 +312,15 @@ public class SmartBand extends CordovaPlugin {
      *
      * @param enable
      */
-    private void scanDevice(boolean enable, int scanSeconds) {
+    private void scanDevice(CallbackContext callbackContext, boolean enable, int scanSeconds) {
+        if (!PermissionHelper.hasPermission(this, ACCESS_COARSE_LOCATION)) {
+            // save info so we can call this method again after permissions are granted
+            app.setCallbackContext(Operation.PermissionCallback.getMethod(), callbackContext);
+            app.setEnable(enable);
+            app.setScanSeconds(scanSeconds);
+            PermissionHelper.requestPermission(this, REQUEST_ACCESS_COARSE_LOCATION, ACCESS_COARSE_LOCATION);
+            return;
+        }
         if (mBLEServiceOperate == null) {
             scanCallback.error("mBLEServiceOperate is null!");
             return;
@@ -377,12 +331,33 @@ public class SmartBand extends CordovaPlugin {
                 public void run() {
                     mBLEServiceOperate.stopLeScan();
                 }
-            }, scanSeconds <= 0 ? heytzSmartApp.getScanPeriod() : scanSeconds * 1000);
+            }, scanSeconds <= 0 ? app.getScanPeriod() : scanSeconds * 1000);
             mBLEServiceOperate.startLeScan();
         } else {
             mBLEServiceOperate.stopLeScan();
         }
     }
 
-
+    /* @Override */
+    public void onRequestPermissionResult(int requestCode, String[] permissions,
+                                          int[] grantResults) /* throws JSONException */ {
+        CallbackContext callbackContext = app.getCallbackContext(Operation.PermissionCallback.getMethod());
+        for (int result : grantResults) {
+            if (result == PackageManager.PERMISSION_DENIED) {
+                LOG.d(TAG, "User *rejected* Coarse Location Access");
+                if (callbackContext != null) {
+                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, PERMISSION_DENIED_ERROR));
+                }
+                return;
+            }
+        }
+        switch (requestCode) {
+            case REQUEST_ACCESS_COARSE_LOCATION:
+                LOG.d(TAG, "User granted Coarse Location Access");
+                if (callbackContext != null) {
+                    scanDevice(callbackContext, app.getEnable(), app.getScanSeconds());
+                }
+                break;
+        }
+    }
 }

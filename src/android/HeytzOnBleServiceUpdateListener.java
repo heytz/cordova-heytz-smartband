@@ -9,11 +9,11 @@ import com.yc.pedometer.sdk.onBleServiceUpdateListener;
  */
 public class HeytzOnBleServiceUpdateListener implements onBleServiceUpdateListener {
     private final String TAG = "==========HeytzOnBleServiceUpdateListener===========\n";
-    private HeytzSmartApp heytzSmartApp;
+    private HeytzSmartApp app;
 
 
     HeytzOnBleServiceUpdateListener(HeytzSmartApp app) {
-        this.heytzSmartApp = app;
+        this.app = app;
     }
 
     @Override
