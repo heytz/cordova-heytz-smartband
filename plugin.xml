@@ -3,6 +3,8 @@
         xmlns:android="http://schemas.android.com/apk/res/android">
     <name>cordova-heytz-smartband</name>
 
+    <dependency id="cordova-plugin-compat" version="^1.1.0" />
+
     <js-module name="SmartBand" src="www/SmartBand.js">
         <clobbers target="cordova.plugins.SmartBand"/>
     </js-module>
