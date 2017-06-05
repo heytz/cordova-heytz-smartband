@@ -55,27 +55,27 @@ android版本要求 sdk 最低18
  
 ###1.初始化
 
-    cordova.plugins.Smartband.init(success,error)
+    cordova.plugins.SmartBand.init(success,error)
      
 ###2.扫描
 
-    cordova.plugins.Smartband.scan(time,success,error)
+    cordova.plugins.SmartBand.scan(time,success,error)
     
 ###3.停止扫描
 
-    cordova.plugins.Smartband.stop(success,error)
+    cordova.plugins.SmartBand.stop(success,error)
    
 ###4.连接
   
-    cordova.plugins.Smartband.connect(address,success,error)
+    cordova.plugins.SmartBand.connect(address,success,error)
     
 ###5.久坐提醒
   
-    cordova.plugins.Smartband.sendSedentaryRemindCommand(flag,miuntes,success,error)
+    cordova.plugins.SmartBand.sendSedentaryRemindCommand(flag,miuntes,success,error)
      
 ###6.摇一摇
   
-    cordova.plugins.Smartband.shakeMode(state,success,error)
+    cordova.plugins.SmartBand.shakeMode(state,success,error)
       
 ###7.智能闹钟
   
@@ -85,7 +85,7 @@ android版本要求 sdk 最低18
     * minute       闹铃分钟
     * isOpen       true 打开闹钟;false 关闭闹钟
     * shakePeriod  手环振动次数，之前直接写死 5 次，现在改为可设 置次数。
-    cordova.plugins.Smartband.sendToSetAlarmCommand(whichClock, weekPeroid, hour, minute, isOpen, shakePeriod, success, error)
+    cordova.plugins.SmartBand.sendToSetAlarmCommand(whichClock, weekPeroid, hour, minute, isOpen, shakePeriod, success, error)
       
 ###9.设置身高体重
 
@@ -102,103 +102,103 @@ android版本要求 sdk 最低18
     *  @param handlight   抬手亮屏的开关 请查看isHasHandLight来判断是否支持此功能
     *
     *  @param maxHeart    超过最大心率值警报 请查看isHasMaxHeartAlert来判断是否支持此功能，关闭则填255
-    cordova.plugins.Smartband.sendStepLenAndWeightToBLE(height, weight, offScreenTime, stepTask, isRraisHandbrightScreenSwitchOpen, isHighestRateOpen, highestRate, success, error)
+    cordova.plugins.SmartBand.sendStepLenAndWeightToBLE(height, weight, offScreenTime, stepTask, isRraisHandbrightScreenSwitchOpen, isHighestRateOpen, highestRate, success, error)
 
 ###10.同步计步数据
   
-    cordova.plugins.Smartband.syncAllStepData(success, error)
+    cordova.plugins.SmartBand.syncAllStepData(success, error)
  
 ###11.同步睡眠数据(同步完成前，请不要进行其他任何的通信工作)
   
-    cordova.plugins.Smartband.syncAllSleepData(success, error)
+    cordova.plugins.SmartBand.syncAllSleepData(success, error)
  
 ###12.查找手环
     * ios 没有vibrationCount 设置
-    cordova.plugins.Smartband.findBand(vibrationCount, success, error)
+    cordova.plugins.SmartBand.findBand(vibrationCount, success, error)
     
 ###19.恢复出厂设置
     
-     cordova.plugins.Smartband.deleteDevicesAllData(success,error)
+     cordova.plugins.SmartBand.deleteDevicesAllData(success,error)
     
 ###20.获取电量
     
-     cordova.plugins.Smartband.sendToReadBLEBattery(success,error)
+     cordova.plugins.SmartBand.sendToReadBLEBattery(success,error)
      
 ###21.获取版本
     
-     cordova.plugins.Smartband.sendToReadBLEVersion(success,error)
+     cordova.plugins.SmartBand.sendToReadBLEVersion(success,error)
    
 ###22.同步时间
     
-     cordova.plugins.Smartband.syncBLETime(success,error)
+     cordova.plugins.SmartBand.syncBLETime(success,error)
      
 ###23.判断蓝牙是否打开
     
-     cordova.plugins.Smartband.isEnabled(success,error)
+     cordova.plugins.SmartBand.isEnabled(success,error)
 
 ###24.查询一天的睡眠总时间
     
-     cordova.plugins.Smartband.querySleepDate(queryDate,success,error)
+     cordova.plugins.SmartBand.querySleepDate(queryDate,success,error)
      
 ###25.新一天初始化计步数据库
     
-     cordova.plugins.Smartband.updateStepSQL(success,error)
+     cordova.plugins.SmartBand.updateStepSQL(success,error)
      
 ###26.查询一天的总步数
     
-     cordova.plugins.Smartband.queryStepDate(queryDate,success,error)
+     cordova.plugins.SmartBand.queryStepDate(queryDate,success,error)
      
 ###27.查询一天的步数、距离、卡路里
     
-     cordova.plugins.Smartband.queryStepInfo(queryDate,success,error)
+     cordova.plugins.SmartBand.queryStepInfo(queryDate,success,error)
      
 ###28.查询某一天各小时步数
     
-     cordova.plugins.Smartband.queryOneHourStepSQL(Calendar,success,error)
+     cordova.plugins.SmartBand.queryOneHourStepSQL(Calendar,success,error)
      
 ###29.读取线损值rssi
     
-     cordova.plugins.Smartband.readRssi(success,error)
+     cordova.plugins.SmartBand.readRssi(success,error)
      
 ###30.断开设备
     
-     cordova.plugins.Smartband.disConnect(id,success,error)
+     cordova.plugins.SmartBand.disConnect(id,success,error)
      
 ###32.查询一天的睡眠详情
     
-     cordova.plugins.Smartband.querySleepInfo(calendar,success,error)
+     cordova.plugins.SmartBand.querySleepInfo(calendar,success,error)
           
 ###33.是否支持蓝牙4.0
     
-     cordova.plugins.Smartband.isSupported(success,error)
+     cordova.plugins.SmartBand.isSupported(success,error)
           
 ###34.判断平台
     
-     cordova.plugins.Smartband.isRKPlatform(success,error)
+     cordova.plugins.SmartBand.isRKPlatform(success,error)
           
 ###35.获取新版本的版本号
     
-     cordova.plugins.Smartband.getServerBtImgVersion(success,error)
+     cordova.plugins.SmartBand.getServerBtImgVersion(success,error)
           
 ###36.获取新版本的版本号
     
-     cordova.plugins.Smartband.getServerPatchVersion(success,error)
+     cordova.plugins.SmartBand.getServerPatchVersion(success,error)
           
 ###37.查询设备升级属性
     
-     cordova.plugins.Smartband.queryDeviceFearture(success,error)
+     cordova.plugins.SmartBand.queryDeviceFearture(success,error)
           
 ###38.同步所有数据
     
-     cordova.plugins.Smartband.syncAllData(success,error)
+     cordova.plugins.SmartBand.syncAllData(success,error)
           
 ###39.检查是否可以发送
     
-     cordova.plugins.Smartband.checkUTEDevicesStateIsEnable(success,error)
+     cordova.plugins.SmartBand.checkUTEDevicesStateIsEnable(success,error)
 
 ###40.打开提醒
     
-     cordova.plugins.Smartband.openRemind(open,type,success,error)
+     cordova.plugins.SmartBand.openRemind(open,type,success,error)
           
     
   
